@@ -57,10 +57,23 @@ add_executable(SkeletonProject
   Skeleton/ColorFragmentShader.glsl
 )
 
+# Lab session 1
+add_executable(CS380-Lab1
+			   CS380-Lab1/main.cpp
+			   common/shader.cpp
+			   common/shader.hpp
+			   CS380-Lab1/VertexShader.glsl
+			   CS380-Lab1/FragmentShader.glsl)
+
 target_link_libraries(SkeletonProject
   ${ALL_LIBS}
 )
 
+target_link_libraries(CS380-Lab1 ${ALL_LIBS})
+
 # Xcode and Visual Studio working directories
 set_target_properties(SkeletonProject PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Skeleton/")
 create_target_launcher(SkeletonProject WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Skeleton/")
+
+set_target_properties (CS380-Lab1 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab1/")
+create_target_launcher(CS380-Lab1 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab1/")
