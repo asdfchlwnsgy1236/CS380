@@ -49,31 +49,43 @@ add_definitions(
 
 # Skeleton Project
 add_executable(SkeletonProject
-  Skeleton/main.cpp
-  common/shader.cpp
-  common/shader.hpp
+	Skeleton/main.cpp
+	common/shader.cpp
+	common/shader.hpp
+	Skeleton/TransformVertexShader.glsl
+	Skeleton/ColorFragmentShader.glsl)
 
-  Skeleton/TransformVertexShader.glsl
-  Skeleton/ColorFragmentShader.glsl
-)
-
-# Lab session 1
-add_executable(CS380-Lab1
-			   CS380-Lab1/main.cpp
-			   common/shader.cpp
-			   common/shader.hpp
-			   CS380-Lab1/VertexShader.glsl
-			   CS380-Lab1/FragmentShader.glsl)
-
-target_link_libraries(SkeletonProject
-  ${ALL_LIBS}
-)
-
-target_link_libraries(CS380-Lab1 ${ALL_LIBS})
+target_link_libraries(SkeletonProject ${ALL_LIBS})
 
 # Xcode and Visual Studio working directories
 set_target_properties(SkeletonProject PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Skeleton/")
 create_target_launcher(SkeletonProject WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Skeleton/")
 
+# Lab session 1
+add_executable(CS380-Lab1
+	CS380-Lab1/main.cpp
+	common/shader.cpp
+	common/shader.hpp
+	CS380-Lab1/VertexShader.glsl
+	CS380-Lab1/FragmentShader.glsl)
+
+target_link_libraries(CS380-Lab1 ${ALL_LIBS})
+
+# Xcode and Visual Studio working directories
 set_target_properties (CS380-Lab1 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab1/")
 create_target_launcher(CS380-Lab1 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab1/")
+
+# Lab session 2
+add_executable(CS380-Lab2
+	CS380-Lab2/main.cpp
+	common/shader.cpp
+	common/shader.hpp
+	common/model.cpp
+	common/model.hpp
+	CS380-Lab2/VertexShader.glsl
+	CS380-Lab2/FragmentShader.glsl)
+target_link_libraries(CS380-Lab2 ${ALL_LIBS})
+
+# Xcode and Visual Studio working directories
+set_target_properties(CS380-Lab2 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab2/")
+create_target_launcher(CS380-Lab2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab2/")

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -32,7 +34,13 @@ std::vector<glm::vec3> g_vertex_buffer_data;
 
 glm::mat4 Projection;
 glm::mat4 View;
-float degree = 0.0f;
+float rotationZ = 0.0f, movementX = 0.5f, movementY = 0.0f, scaling = 1.0f;
+bool rotationControl = true, movementXControl = true, movementYControl = true, scalingControl = true;
+int desiredFPS = 60;
+
+void sleepFor(double seconds){
+	std::this_thread::sleep_for(std::chrono::milliseconds((int) (seconds * 1000)));
+}
 
 void koch_line(glm::vec3 a, glm::vec3 b, int iter)
 {
@@ -82,7 +90,7 @@ void init_model(void)
 }
 
 // TODO: Draw model
-void draw_model()
+void draw_model(mat4 rotation, mat4 translation, mat4 scale)
 {
 	glUseProgram(programID);
 	glBindVertexArray(VAID);
@@ -90,8 +98,9 @@ void draw_model()
 	glBindBuffer(GL_ARRAY_BUFFER, VBID);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), BUFFER_OFFSET(0));
 
-	glm::mat4 Model = glm::mat4(1.0f);
-	glm::mat4 MVP = Projection * View * Model;
+	//glm::mat4 Model = glm::mat4(1.0f);
+	//glm::mat4 MVP = Projection * View * Model;
+	mat4 MVP = Projection * View * translation * rotation * scale;
 
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -153,14 +162,75 @@ int main(int argc, char* argv[])
 	// END
 	init_model();
 
+	double previousTime, elapsedTime, timePerFrame = 1.0 / desiredFPS;
+	int ticks = 0;
+
 	// Step 2: Main event loop
 	do {
+		previousTime = glfwGetTime();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		draw_model();
+		// start messing with draw_model() here
+		rotationZ += 1.0f;
+
+		if(movementX < -0.5f){
+			movementXControl = true;
+		}
+		else if(movementX > 0.5f){
+			movementXControl = false;
+		}
+		if(movementY < -0.5f){
+			movementYControl = true;
+		}
+		else if(movementY > 0.5f){
+			movementYControl = false;
+		}
+		if(movementXControl){
+			movementX += 0.01f;
+		}
+		else{
+			movementX -= 0.01f;
+		}
+		if(movementYControl){
+			movementY += 0.01f;
+		}
+		else{
+			movementY -= 0.01f;
+		}
+
+		if(scaling < 0.25f){
+			scalingControl = true;
+		}
+		else if(scaling > 1.0f){
+			scalingControl = false;
+		}
+		if(scalingControl){
+			scaling += 0.01f;
+		}
+		else{
+			scaling -= 0.01f;
+		}
+		mat4 rotation = rotate(rotationZ, vec3(0.0f, 0.0f, 1.0f));
+		mat4 translation = translate(mat4(1.0f), vec3(movementX, movementY, 0.0f));
+		mat4 scale = glm::scale(mat4(1.0f), vec3(scaling, scaling, 0.0f));
+
+		draw_model(rotation, translation, scale); // remember to use multiple draw_model() calls with different parameters to the method to draw multiple of the same object
+		// end messing with draw_model() here
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		elapsedTime = glfwGetTime() - previousTime;
+		if(elapsedTime < timePerFrame){
+			sleepFor(timePerFrame - elapsedTime);
+		}
+
+		ticks++;
+		if(ticks >= desiredFPS){
+			std::cout << "fps: " << ticks << std::endl;
+			ticks = 0;
+		}
 	} while (!glfwWindowShouldClose(window));
 
 	// Step 3: Termination
