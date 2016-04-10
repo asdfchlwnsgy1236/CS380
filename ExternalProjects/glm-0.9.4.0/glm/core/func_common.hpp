@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////////
+ï»¿///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
 /// Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)
@@ -278,8 +278,8 @@ namespace glm
 	/// you would want a threshold function with a smooth
 	/// transition. This is equivalent to:
 	/// genType t;
-	/// t = clamp ((x – edge0) / (edge1 – edge0), 0, 1);
-	/// return t * t * (3 – 2 * t);
+	/// t = clamp ((x ?edge0) / (edge1 ?edge0), 0, 1);
+	/// return t * t * (3 ?2 * t);
 	/// Results are undefined if edge0 >= edge1.
 	///
 	/// @tparam genType Floating-point scalar or vector types.
