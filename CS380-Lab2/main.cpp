@@ -39,7 +39,7 @@ glm::mat4 redCubeRBT;
 glm::mat4 greenCubeRBT;
 glm::mat4 eyeRBT;
 
-int select_frame = 0;
+int select_viewpoint = 0;
 int number_of_frames = 3;
 
 glm::vec3 vertices[8] = {
@@ -116,7 +116,7 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 		// TODO: Change select_frame by Keyboard Input
 		switch(key){
 			case GLFW_KEY_V:
-				select_frame = (select_frame + 1) % number_of_frames;
+				select_viewpoint = (select_viewpoint + 1) % number_of_frames;
 				break;
 			default:
 				break;
@@ -161,7 +161,7 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 		}
 
 		// TODO: Apply Transformation To Frame
-		switch(select_frame){
+		switch(select_viewpoint){
 			case 0:
 				skyRBT *= m;
 				break;
@@ -229,7 +229,7 @@ int main(void){
 	// Initialize Ground Model
 	ground = Model();
 	init_ground(ground);
-	ground.initialize("VertexShader.glsl", "FragmentShader.glsl");
+//	ground.initialize("VertexShader.glsl", "FragmentShader.glsl");
 	ground.set_projection(&Projection);
 	ground.set_eye(&eyeRBT);
 	glm::mat4 groundRBT = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, g_groundY, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(g_groundSize, 1.0f, g_groundSize));
@@ -238,7 +238,7 @@ int main(void){
 	// TODO: Initialize Two Cube Models
 	redCube = Model();
 	init_cube(redCube, vec3(1.0f, 0.0f, 0.0f));
-	redCube.initialize("VertexShader.glsl", "FragmentShader.glsl");
+//	redCube.initialize("VertexShader.glsl", "FragmentShader.glsl");
 	redCube.set_projection(&Projection);
 	redCube.set_eye(&eyeRBT);
 	redCubeRBT = translate(mat4(1.0f), vec3(-1.5f, 0.5f, 0.0f)) * rotate(mat4(1.0f), -90.0f, vec3(0.0f, 1.0f, 0.0f));
@@ -246,7 +246,7 @@ int main(void){
 
 	greenCube = Model();
 	init_cube(greenCube, vec3(0.0f, 1.0f, 0.0f));
-	greenCube.initialize("VertexShader.glsl", "FragmentShader.glsl");
+//	greenCube.initialize("VertexShader.glsl", "FragmentShader.glsl");
 	greenCube.set_projection(&Projection);
 	greenCube.set_eye(&eyeRBT);
 	greenCubeRBT = translate(mat4(1.0f), vec3(1.5f, 0.5f, 0.0f)) * rotate(mat4(1.0f), 90.0f, vec3(0.0f, 1.0f, 0.0f));
@@ -275,7 +275,7 @@ int main(void){
 		currTime = glfwGetTime();
 
 		// TODO: Change Viewpoint by select_frame
-		eyeRBT = select_frame == 0 ? skyRBT : select_frame == 1 ? redCubeRBT : greenCubeRBT;
+		eyeRBT = select_viewpoint == 0 ? skyRBT : select_viewpoint == 1 ? redCubeRBT : greenCubeRBT;
 		// TODO END
 
 		// TODO: Draw Two Cube Models
