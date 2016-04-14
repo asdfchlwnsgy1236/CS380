@@ -1,4 +1,5 @@
 // Include standard headers
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -51,9 +52,13 @@ glm::mat4 aFrame, objectRBT;
 Model arcBall;
 glm::mat4 arcballRBT = glm::mat4(1.0f);
 float arcBallScreenRadius = 0.25f * min(windowWidth, windowHeight); // for the initial assignment
+float arcBallRadius = arcBallScreenRadius;
 float arcBallScale = 0.01f;
-vec2 mousePosCur, mousePosPrev;
-bool arcBallExists, leftMousePressed = false, rightMousePressed = false, middleMousePressed = false;
+vec2 mousePosCur, mousePosFirst, mousePosLast;
+vec3 arcBallPos = vec3();
+bool arcBallExists,
+leftMousePressed = false, rightMousePressed = false, middleMousePressed = false,
+leftMouseReleased = false, rightMouseReleased = false, middleMouseReleased = false;
 quat arcBallQuat;
 
 // Function definition
@@ -96,30 +101,37 @@ static void window_size_callback(GLFWwindow* window, int width, int height){
 // TODO: Fill up GLFW mouse button callback function
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
 	if(action == GLFW_PRESS){
-		switch(button){
-			case GLFW_MOUSE_BUTTON_LEFT:
-				leftMousePressed = true;
-				break;
-			case GLFW_MOUSE_BUTTON_RIGHT:
-				rightMousePressed = true;
-				break;
-			case GLFW_MOUSE_BUTTON_MIDDLE:
-				middleMousePressed = true;
-				break;
-			default:
-				break;
+		if(distance(eye_to_screen(arcBallPos, Projection, frameBufferWidth, frameBufferHeight), mousePosCur) <= arcBallRadius){
+			set(mousePosFirst, mousePosCur.x, mousePosCur.y);
+			switch(button){
+				case GLFW_MOUSE_BUTTON_LEFT:
+					leftMousePressed = true;
+					break;
+				case GLFW_MOUSE_BUTTON_RIGHT:
+					rightMousePressed = true;
+					break;
+				case GLFW_MOUSE_BUTTON_MIDDLE:
+					middleMousePressed = true;
+					break;
+				default:
+					break;
+			}
 		}
 	}
 	else{
+		set(mousePosLast, mousePosCur.x, mousePosCur.y);
 		switch(button){
 			case GLFW_MOUSE_BUTTON_LEFT:
 				leftMousePressed = false;
+				leftMouseReleased = true;
 				break;
 			case GLFW_MOUSE_BUTTON_RIGHT:
 				rightMousePressed = false;
+				rightMouseReleased = true;
 				break;
 			case GLFW_MOUSE_BUTTON_MIDDLE:
 				middleMousePressed = false;
+				middleMouseReleased = true;
 				break;
 			default:
 				break;
@@ -315,24 +327,45 @@ int main(void){
 			arcBallExists = false;
 		}
 
-		if(arcBallExists){
-			// TODO: object manipulation through mouse interaction rotation part
-		}
-		redCube.draw();
-		greenCube.draw();
-		ground.draw();
-
 		// TODO: Draw wireframe of arcball with dynamic radius
 		if(arcBallExists){
+			// Deal with the mouse interactions
+			if(leftMousePressed){
+				vec3 p0 = vec3(mousePosFirst.x, mousePosFirst.y, std::sqrtf(arcBallRadius * arcBallRadius - dot(mousePosFirst, mousePosFirst)));
+				if(length(mousePosCur) > arcBallRadius){
+					mousePosCur = normalize(mousePosCur) * arcBallRadius;
+				}
+				float z = arcBallRadius * arcBallRadius - dot(mousePosCur, mousePosCur);
+				z = z > 0.0f ? std::sqrtf(z) : 0.0f;
+				vec3 p1 = vec3(mousePosCur.x, mousePosCur.y, z);
+				// TODO: Now actually make and use the quaternion here.
+			}
+			if(leftMouseReleased){
+				leftMouseReleased = false;
+				vec3 p0 = vec3(mousePosFirst.x, mousePosFirst.y, std::sqrtf(arcBallRadius * arcBallRadius - dot(mousePosFirst, mousePosFirst)));
+				if(length(mousePosLast) > arcBallRadius){
+					mousePosLast = normalize(mousePosLast) * arcBallRadius;
+				}
+				float z = arcBallRadius * arcBallRadius - dot(mousePosLast, mousePosLast);
+				z = z > 0.0f ? std::sqrtf(z) : 0.0f;
+				vec3 p1 = vec3(mousePosLast.x, mousePosLast.y, z);
+			}
+
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			vec3 viewDir = vec3(eyeRBT[0][2], eyeRBT[1][2], eyeRBT[2][2]),
 				cameraToAFrame = vec3(aFrame[3][0], aFrame[3][1], aFrame[3][2]) - vec3(eyeRBT[3][0], eyeRBT[3][1], eyeRBT[3][2]);
 			float projDist = length(proj(cameraToAFrame, viewDir));
 			arcBallScale = arcBallScreenRadius * compute_screen_eye_scale(-projDist, fovy, frameBufferHeight);
 			arcballRBT = aFrame * scale(mat4(), vec3(arcBallScale));
+			arcBallPos = vec3(aFrame[3][0], aFrame[3][1], aFrame[3][2]);
+			arcBallRadius = arcBallScreenRadius;
 			arcBall.draw();
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
+
+		redCube.draw();
+		greenCube.draw();
+		ground.draw();
 
 		// Swap buffers (Double buffering)
 		glfwSwapBuffers(window);
