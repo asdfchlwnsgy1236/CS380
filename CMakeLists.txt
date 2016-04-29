@@ -62,34 +62,34 @@ set_target_properties(SkeletonProject PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_B
 create_target_launcher(SkeletonProject WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Skeleton/")
 
 # Lab session 1
-add_executable(CS380-Lab1
-	CS380-Lab1/main.cpp
+add_executable(Lab1
+	Lab1/main.cpp
 	common/shader.cpp
 	common/shader.hpp
-	CS380-Lab1/VertexShader.glsl
-	CS380-Lab1/FragmentShader.glsl)
+	Lab1/VertexShader.glsl
+	Lab1/FragmentShader.glsl)
 
-target_link_libraries(CS380-Lab1 ${ALL_LIBS})
+target_link_libraries(Lab1 ${ALL_LIBS})
 
 # Xcode and Visual Studio working directories
-set_target_properties (CS380-Lab1 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab1/")
-create_target_launcher(CS380-Lab1 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab1/")
+set_target_properties (Lab1 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Lab1/")
+create_target_launcher(Lab1 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Lab1/")
 
 # Lab session 2
-add_executable(CS380-Lab2
-	CS380-Lab2/main.cpp
+add_executable(Lab2
+	Lab2/main.cpp
 	common/shader.cpp
 	common/shader.hpp
 	common/model.cpp
 	common/model.hpp
-	CS380-Lab2/VertexShader.glsl
-	CS380-Lab2/FragmentShader.glsl)
+	Lab2/VertexShader.glsl
+	Lab2/FragmentShader.glsl)
 
-target_link_libraries(CS380-Lab2 ${ALL_LIBS})
+target_link_libraries(Lab2 ${ALL_LIBS})
 
 # Xcode and Visual Studio working directories
-set_target_properties(CS380-Lab2 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab2/")
-create_target_launcher(CS380-Lab2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/CS380-Lab2/")
+set_target_properties(Lab2 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Lab2/")
+create_target_launcher(Lab2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Lab2/")
 
 # Project 2: Object manipulation with arcball
 add_executable(Homework2
@@ -109,3 +109,25 @@ target_link_libraries(Homework2 ${ALL_LIBS})
 # Xcode and Visual Studio working directories
 set_target_properties(Homework2 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Homework2/")
 create_target_launcher(Homework2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Homework2/")
+
+# Homework 3: 3x3x1 Rubic cube simulation
+add_executable(Homework3
+	Homework3/main.cpp
+	common/shader.cpp
+	common/shader.hpp
+	common/model.cpp
+	common/model.hpp
+	common/geometry.hpp
+	common/affine.hpp
+	common/arcball.hpp # arcball helper function
+	common/picking.hpp # picking helper function
+	Homework3/VertexShader.glsl
+	Homework3/FragmentShader.glsl
+	Homework3/PickingVertexShader.glsl
+	Homework3/PickingFragmentShader.glsl)
+
+target_link_libraries(Homework3 ${ALL_LIBS})
+
+# Xcode and Visual Studio working directories
+set_target_properties(Homework3 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Homework3/")
+create_target_launcher(Homework3 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Homework3/")
