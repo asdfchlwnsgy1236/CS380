@@ -40,7 +40,7 @@ float fovy = fov;
 // Model properties
 Model ground, redCube, greenCube;
 glm::mat4 skyRBT;
-glm::mat4 g_objectRbt[2] = { glm::translate(glm::mat4(1.0f), glm::vec3(-1.5f, 0.5f, 0.0f)) * glm::rotate(glm::mat4(1.0f), -90.0f, glm::vec3(0.0f, 1.0f, 0.0f)), // RBT for redCube
+glm::mat4 g_objectRbt[2] = {glm::translate(glm::mat4(1.0f), glm::vec3(-1.5f, 0.5f, 0.0f)) * glm::rotate(glm::mat4(1.0f), -90.0f, glm::vec3(0.0f, 1.0f, 0.0f)), // RBT for redCube
 							glm::translate(glm::mat4(1.0f), glm::vec3(1.5f, 0.5f, 0.0f)) * glm::rotate(glm::mat4(1.0f), 90.0f, glm::vec3(0.0f, 1.0f, 0.0f))}; // RBT for greenCube
 glm::mat4 eyeRBT;
 glm::mat4 worldRBT = glm::mat4(1.0f);
@@ -61,24 +61,21 @@ static void keyboard_callback(GLFWwindow*, int, int, int, int);
 void update_fovy(void);
 
 // Helper function: Update the vertical field-of-view(float fovy in global)
-void update_fovy()
-{
-	if (frameBufferWidth >= frameBufferHeight)
-	{
+void update_fovy(){
+	if(frameBufferWidth >= frameBufferHeight){
 		fovy = fov;
 	}
-	else {
+	else{
 		const float RAD_PER_DEG = 0.5f * glm::pi<float>() / 180.0f;
 		fovy = (float) atan2(sin(fov * RAD_PER_DEG) * ((float) frameBufferHeight / (float) frameBufferWidth), cos(fov * RAD_PER_DEG)) / RAD_PER_DEG;
 	}
 }
 
 // TODO: Modify GLFW window resized callback function
-static void window_size_callback(GLFWwindow* window, int width, int height)
-{
+static void window_size_callback(GLFWwindow* window, int width, int height){
 	// Get resized size and set to current window
-	windowWidth = (float)width;
-	windowHeight = (float)height;
+	windowWidth = (float) width;
+	windowHeight = (float) height;
 
 	// glViewport accept pixel size, please use glfwGetFramebufferSize rather than window size.
 	// window size != framebuffer size
@@ -93,52 +90,43 @@ static void window_size_callback(GLFWwindow* window, int width, int height)
 }
 
 // TODO: Fill up GLFW mouse button callback function
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
 	//example code for picking
-	if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-	{
+	if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS){
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 		xpos = xpos / ((double) windowWidth) * ((double) frameBufferWidth);
 		ypos = ypos / ((double) windowHeight) * ((double) frameBufferHeight);
-		int target = pick((int)xpos, (int)ypos, frameBufferWidth, frameBufferHeight);
+		int target = pick((int) xpos, (int) ypos, frameBufferWidth, frameBufferHeight);
 		std::cout << "Picked node: " << target << std::endl;
 	}
 }
 
 // TODO: Fill up GLFW cursor position callback function
-static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
-{
-
+static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
 }
 
-static void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (action == GLFW_PRESS)
-	{
-		switch (key)
-		{
-		case GLFW_KEY_H:
-			std::cout << "CS380 Homework Assignment 2" << std::endl;
-			std::cout << "keymaps:" << std::endl;
-			std::cout << "h\t\t Help command" << std::endl;
-			std::cout << "p\t\t Enable/Disable picking" << std::endl;
-			break;
-		case GLFW_KEY_P:
-			// TODO: Enable/Disable picking
-			break;
-		default:
-			break;
+static void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+	if(action == GLFW_PRESS){
+		switch(key){
+			case GLFW_KEY_H:
+				std::cout << "CS380 Homework Assignment 3" << std::endl;
+				std::cout << "keymaps:" << std::endl;
+				std::cout << "h\t\t Help command" << std::endl;
+				std::cout << "p\t\t Enable/Disable picking" << std::endl;
+				break;
+			case GLFW_KEY_P:
+				// TODO: Enable/Disable picking
+				break;
+			default:
+				break;
 		}
 	}
 }
 
-int main(void)
-{
+int main(void){
 	// Initialise GLFW
-	if (!glfwInit())
-	{
+	if(!glfwInit()){
 		return -1;
 	}
 
@@ -149,8 +137,8 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow((int)windowWidth, (int)windowHeight, "Homework 3: Your Student ID - Your Name ", NULL, NULL);
-	if (window == NULL) {
+	window = glfwCreateWindow((int) windowWidth, (int) windowHeight, "Homework 3: Your Student ID - Your Name ", NULL, NULL);
+	if(window == NULL){
 		glfwTerminate();
 		return -1;
 	}
@@ -158,7 +146,7 @@ int main(void)
 
 	// Initialize GLEW
 	glewExperimental = (GLboolean) true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
+	if(glewInit() != GLEW_OK){
 		return -1;
 	}
 
@@ -174,7 +162,7 @@ int main(void)
 	arcBallScreenRadius = 0.25f * min((float) frameBufferWidth, (float) frameBufferHeight); // for the initial assignment
 
 	// Clear with sky color
-	glClearColor((GLclampf)(128. / 255.), (GLclampf)(200. / 255.), (GLclampf)(255. / 255.), (GLclampf) 0.);
+	glClearColor((GLclampf) (128. / 255.), (GLclampf) (200. / 255.), (GLclampf) (255. / 255.), (GLclampf) 0.);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -241,7 +229,7 @@ int main(void)
 	lightLocArc = glGetUniformLocation(arcBall.GLSLProgramID, "uLight");
 	glUniform3f(lightLocArc, lightVec.x, lightVec.y, lightVec.z);
 
-	do {
+	do{
 		// first pass: picking shader
 		// binding framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, picking_fbo);
@@ -256,7 +244,7 @@ int main(void)
 		// second pass: your drawing
 		// unbinding framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor((GLclampf)(128. / 255.), (GLclampf)(200. / 255.), (GLclampf)(255. / 255.), (GLclampf)0.);
+		glClearColor((GLclampf) (128. / 255.), (GLclampf) (200. / 255.), (GLclampf) (255. / 255.), (GLclampf)0.);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		redCube.draw();
@@ -269,10 +257,10 @@ int main(void)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	} // Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
+	while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+		  glfwWindowShouldClose(window) == 0);
 
-	// Clean up data structures and glsl objects
+	  // Clean up data structures and glsl objects
 	ground.cleanup();
 	redCube.cleanup();
 	greenCube.cleanup();

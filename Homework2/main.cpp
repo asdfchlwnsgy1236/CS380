@@ -1,7 +1,3 @@
-// TODO: Change the mouse interaction so that it uses the alternate method (the current one does not work)
-
-
-
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,13 +51,12 @@ glm::mat4 aFrame, objectRBT;
 Model arcBall;
 glm::mat4 arcballRBT = glm::mat4(1.0f);
 float arcBallScreenRadius = 0.25f * min(windowWidth, windowHeight); // for the initial assignment
-float arcBallRadius = arcBallScreenRadius;
 float arcBallScale = 0.01f;
-vec2 mousePosCur = vec2(), arcBallScreenPos = vec2();
-vec3 arcBallEyePos = vec3();
+vec2 mousePos = vec2(), arcBallScreenPos = vec2();
+vec3 arcBallEyePos = vec3(), mouseSpherePos = vec3();
 bool arcBallExists,
-leftMousePressed = false, rightMousePressed = false, middleMousePressed = false;
-quat arcBallQuat;
+leftMousePressed = false, rightMousePressed = false, middleMousePressed = false,
+leftMouseReleased = false, rightMouseReleased = false, middleMouseReleased = false;
 
 // Function definition
 static void window_size_callback(GLFWwindow*, int, int);
@@ -69,15 +64,6 @@ static void mouse_button_callback(GLFWwindow*, int, int, int);
 static void cursor_pos_callback(GLFWwindow*, double, double);
 static void keyboard_callback(GLFWwindow*, int, int, int, int);
 void update_fovy(void);
-void copy_mat4(mat4 *from, mat4 *to);
-
-void copy_mat4(mat4 *from, mat4 *to){
-	for(int a = 0; a < 4; a++){
-		for(int b = 0; b < 4; b++){
-			(*to)[a][b] = (*from)[a][b];
-		}
-	}
-}
 
 // Helper function: Update the vertical field-of-view(float fovy in global)
 void update_fovy(){
@@ -112,7 +98,7 @@ static void window_size_callback(GLFWwindow* window, int width, int height){
 // TODO: Fill up GLFW mouse button callback function
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
 	if(action == GLFW_PRESS){
-		if(distance(eye_to_screen(arcBallEyePos, Projection, frameBufferWidth, frameBufferHeight), mousePosCur) <= arcBallRadius){
+		if(distance(eye_to_screen(arcBallEyePos, Projection, frameBufferWidth, frameBufferHeight), mousePos) <= arcBallScreenRadius){
 			switch(button){
 				case GLFW_MOUSE_BUTTON_LEFT:
 					leftMousePressed = true;
@@ -132,12 +118,15 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		switch(button){
 			case GLFW_MOUSE_BUTTON_LEFT:
 				leftMousePressed = false;
+				leftMouseReleased = true;
 				break;
 			case GLFW_MOUSE_BUTTON_RIGHT:
 				rightMousePressed = false;
+				rightMouseReleased = true;
 				break;
 			case GLFW_MOUSE_BUTTON_MIDDLE:
 				middleMousePressed = false;
+				middleMouseReleased = true;
 				break;
 			default:
 				break;
@@ -149,34 +138,51 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
 	if(arcBallExists){
 		if(leftMousePressed){
-			vec2 mpf = mousePosCur - vec2(arcBallScreenPos);
-			set(mousePosCur, (float) xpos, (float) ypos);
-			vec2 mpc = mousePosCur - vec2(arcBallScreenPos);
-			vec3 p0 = normalize(vec3(mpf.x, -mpf.y, sqrtf(arcBallRadius * arcBallRadius - dot(mpf, mpf))));
-			float z = arcBallRadius * arcBallRadius - dot(mpc, mpc);
+			float dx = xpos - mousePos.x, dy = windowHeight - ypos - 1.0f - mousePos.y, mouseAngle = atan2f(dy, dx),
+				limitDx = abs(arcBallScreenRadius * cosf(mouseAngle)), limitDy = abs(arcBallScreenRadius * sinf(mouseAngle)), z;
+			if(dx > limitDx){
+				dx = limitDx;
+			}
+			if(dy > limitDy){
+				dy = limitDy;
+			}
+
+			quat arcBallQuat = quat();
+			vec3 arcBallTrans = vec3(), mouseSpherePosCur = vec3();
+			vec2 mpc = mousePos - arcBallScreenPos;
+			z = arcBallScreenRadius * arcBallScreenRadius - dot(mpc, mpc);
 			z = z > 0.0f ? sqrtf(z) : 0.0f;
-			vec3 p1 = normalize(vec3(mpc.x, -mpc.y, z));
-			arcBallQuat = normalize(quat(angle(p0, p1) / 2.0f, normalize(cross(p0, p1))));
-			quat tmpInvQuat = inverse(arcBallQuat);
-			mat4 tmpRot = rotate(mat4(), arcBallQuat.w, vec3(arcBallQuat.x, arcBallQuat.y, arcBallQuat.z)),
-				tmpInvRot = rotate(mat4(), tmpInvQuat.w, vec3(tmpInvQuat.x, tmpInvQuat.y, tmpInvQuat.z));
+			mouseSpherePosCur = normalize(vec3(mpc.x, mpc.y, z));
+
+			if(!all(equal(mouseSpherePos, vec3()))){
+				arcBallQuat = quat(0.0f, mouseSpherePosCur) * quat(0.0f, mouseSpherePos * -1.0f);
+			}
+			set(mouseSpherePos, mouseSpherePosCur.x, mouseSpherePosCur.y, mouseSpherePosCur.z);
+			arcBallQuat = angleAxis(angle(arcBallQuat) / 2.0f, axis(arcBallQuat));
+
+			mat4 transformM = mat4_cast(arcBallQuat), transformMInv = mat4_cast(inverse(arcBallQuat));
+
 			switch(select_object){
 				case 0:
-					g_objectRbt[0] = aFrame * linearFact(g_objectRbt[0]) * tmpRot;
+					g_objectRbt[0] = aFrame * transformM * inverse(aFrame) * g_objectRbt[0];
 					break;
 				case 1:
-					g_objectRbt[1] = aFrame * linearFact(g_objectRbt[1]) * tmpRot;
+					g_objectRbt[1] = aFrame * transformM * inverse(aFrame) * g_objectRbt[1];
 					break;
 				case 2:
-					skyRBT = aFrame * linearFact(skyRBT) * tmpInvRot;
+					skyRBT = aFrame * transformMInv * inverse(aFrame) * skyRBT;
 					break;
 				default:
 					break;
 			}
 		}
+		else if(leftMouseReleased){
+			leftMouseReleased = false;
+			vec3 tmp = vec3();
+			set(mouseSpherePos, tmp.x, tmp.y, tmp.z);
+		}
+		set(mousePos, (float) xpos, windowHeight - (float) ypos - 1.0f);
 	}
-
-	set(mousePosCur, (float) xpos, (float) ypos);
 }
 
 static void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -367,14 +373,17 @@ int main(void){
 		// TODO: Draw wireframe of arcball with dynamic radius
 		if(arcBallExists){
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			vec3 viewDir = vec3(eyeRBT[0][2], eyeRBT[1][2], eyeRBT[2][2]),
-				cameraToAFrame = vec3(aFrame[3][0], aFrame[3][1], aFrame[3][2]) - vec3(eyeRBT[3][0], eyeRBT[3][1], eyeRBT[3][2]);
-			float projDist = length(proj(cameraToAFrame, viewDir));
-			arcBallScale = arcBallScreenRadius * compute_screen_eye_scale(-projDist, fovy, frameBufferHeight);
+			//vec3 viewDir = vec3(eyeRBT[0][2], eyeRBT[1][2], eyeRBT[2][2]),
+			//	cameraToAFrame = vec3(aFrame[3][0], aFrame[3][1], aFrame[3][2]) - vec3(eyeRBT[3][0], eyeRBT[3][1], eyeRBT[3][2]);
+			//float projDist = length(proj(cameraToAFrame, viewDir));
+			//arcBallScale = arcBallScreenRadius * compute_screen_eye_scale(-projDist, fovy, frameBufferHeight);
+			mat4 eyeToAFrame = inverse(eyeRBT) * aFrame;
+			arcBallScale = arcBallScreenRadius * compute_screen_eye_scale(eyeToAFrame[3][2], fovy, frameBufferHeight);
 			arcballRBT = aFrame * scale(mat4(), vec3(arcBallScale));
-			set(arcBallEyePos, cameraToAFrame.x, -cameraToAFrame.y, cameraToAFrame.z);
+			//set(arcBallEyePos, cameraToAFrame.x, -cameraToAFrame.y, cameraToAFrame.z);
+			set(arcBallEyePos, eyeToAFrame[3][0], eyeToAFrame[3][1], eyeToAFrame[3][2]);
 			arcBallScreenPos = eye_to_screen(arcBallEyePos, Projection, frameBufferWidth, frameBufferHeight);
-			arcBallRadius = arcBallScreenRadius;
+			arcBallScreenRadius = arcBallScreenRadius;
 			arcBall.draw();
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
