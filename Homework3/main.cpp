@@ -85,6 +85,8 @@ static void window_size_callback(GLFWwindow* window, int width, int height){
 	// re-allocate textures with respect to new framebuffer width and height
 	reallocate_picking_texture(frameBufferWidth, frameBufferHeight);
 
+	update_fovy();
+
 	// Update projection matrix
 	Projection = glm::perspective(fov, ((float) frameBufferWidth / (float) frameBufferHeight), 0.1f, 100.0f);
 }

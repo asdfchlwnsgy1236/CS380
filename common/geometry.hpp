@@ -126,13 +126,4 @@ void init_sphere(Model &model)
 	}
 }
 
-void init_obj(Model &model, char *path, glm::vec3 color){
-	bool load = model.loadOBJ(path, color);
-	if (!load){
-		std::cout << "imposible to load OBJ file" << std::endl;
-		system("pause");
-		exit(1);
-	}
-}
-
 #endif
