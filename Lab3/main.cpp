@@ -320,7 +320,7 @@ int main(void){
 
 	//TODO: Initialize model by loading .obj file
 	object = Model();
-	init_obj(object, "bunny.obj", vec3(0.1f, 0.3f, 1.0f));
+//	init_obj(object, "bunny.obj", vec3(0.1f, 0.3f, 1.0f));
 	object.initialize(DRAW_TYPE::ARRAY, "VertexShader.glsl", "FragmentShader.glsl");
 	object.set_projection(&Projection);
 	object.set_eye(&eyeRBT);

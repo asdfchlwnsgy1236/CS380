@@ -110,7 +110,7 @@ target_link_libraries(Homework2 ${ALL_LIBS})
 set_target_properties(Homework2 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Homework2/")
 create_target_launcher(Homework2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Homework2/")
 
-# Homework 3: 3x3x1 Rubic cube simulation
+# Homework 3: 3x3x1 rubik cube simulation
 add_executable(Homework3
 	Homework3/main.cpp
 	common/shader.cpp

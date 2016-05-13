@@ -54,7 +54,7 @@ float arcBallScreenRadius = 0.25f * min(windowWidth, windowHeight); // for the i
 float arcBallScale = 0.01f, screenToEyeScale, fallBackScale = 0.01f;
 vec2 mousePos = vec2(), mousePosPrev = vec2(), arcBallScreenPos = vec2();
 vec3 arcBallEyePos = vec3(), mouseSpherePos = vec3();
-bool arcBallExists, mousePressed, mouseReleased, mouseFirst, mouseSecond = false, 
+bool arcBallExists, mousePressed, mouseReleased, mouseFirst, mouseSecond = false,
 leftMousePressed = false, rightMousePressed = false, middleMousePressed = false,
 leftMouseReleased = false, rightMouseReleased = false, middleMouseReleased = false,
 leftMouseFirst = false, rightMouseFirst = false, middleMouseFirst = false;
@@ -66,7 +66,7 @@ static void cursor_pos_callback(GLFWwindow*, double, double);
 static void keyboard_callback(GLFWwindow*, int, int, int, int);
 void update_fovy(void);
 
-void print_mat4(mat4 source){
+void printMat4(mat4 source){
 	for(int r = 0; r < 4; r++){
 		for(int c = 0; c < 4; c++){
 			std::cout << source[r][c] << "\t";
@@ -75,7 +75,7 @@ void print_mat4(mat4 source){
 	}
 }
 
-void copy_mat4(mat4 *from, mat4 *to){
+void copyMat4(mat4 *from, mat4 *to){
 	for(int c = 0; c < 4; c++){
 		for(int r = 0; r < 4; r++){
 			(*to)[r][c] = (*from)[r][c];
@@ -83,7 +83,7 @@ void copy_mat4(mat4 *from, mat4 *to){
 	}
 }
 
-void update_mouse_bools(){
+void updateMouseBools(){
 	mousePressed = leftMousePressed || rightMousePressed || middleMousePressed;
 	mouseReleased = leftMouseReleased || rightMouseReleased || middleMouseReleased;
 	mouseFirst = leftMouseFirst || rightMouseFirst || middleMouseFirst;
@@ -158,7 +158,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 				break;
 		}
 	}
-	update_mouse_bools();
+	updateMouseBools();
 }
 
 // TODO: Fill up GLFW cursor position callback function
@@ -225,13 +225,13 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
 
 			switch(select_object){
 				case 0:
-					copy_mat4(&g_objectRbt[0], &objectRBTPrev);
+					copyMat4(&g_objectRbt[0], &objectRBTPrev);
 					break;
 				case 1:
-					copy_mat4(&g_objectRbt[1], &objectRBTPrev);
+					copyMat4(&g_objectRbt[1], &objectRBTPrev);
 					break;
 				case 2:
-					copy_mat4(&skyRBT, &objectRBTPrev);
+					copyMat4(&skyRBT, &objectRBTPrev);
 					break;
 				default:
 					break;
@@ -279,7 +279,7 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
 		leftMouseReleased = rightMouseReleased = middleMouseReleased = false;
 	}
 	set(mousePos, (float) xpos, windowHeight - (float) ypos - 1.0f);
-	update_mouse_bools();
+	updateMouseBools();
 }
 
 static void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -478,7 +478,6 @@ int main(void){
 			arcballRBT = aFrame * scale(vec3(arcBallScale));
 			set(arcBallEyePos, eyeToAFrame[3][0], eyeToAFrame[3][1], eyeToAFrame[3][2]);
 			arcBallScreenPos = eye_to_screen(arcBallEyePos, Projection, frameBufferWidth, frameBufferHeight);
-			arcBallScreenRadius = arcBallScreenRadius;
 			arcBall.draw();
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}

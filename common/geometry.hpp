@@ -55,7 +55,7 @@ void init_cube(Model &model, glm::vec3 color)
 	quad(model, 5, 4, 0, 1, color);
 }
 
-void init_rubic(Model& model, glm::vec3* colors)
+void init_rubik(Model& model, glm::vec3* colors)
 {
 	quad(model, 1, 0, 3, 2, colors[0]);
 	quad(model, 2, 3, 7, 6, colors[4]);

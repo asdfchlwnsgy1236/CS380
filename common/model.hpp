@@ -5,12 +5,12 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-enum DRAW_TYPE {
+enum DRAW_TYPE{
 	ARRAY,
 	INDEX
 };
 
-class Model {
+class Model{
 	std::vector<glm::vec3> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> normals;
@@ -19,7 +19,7 @@ class Model {
 	glm::mat4* Projection;
 	glm::mat4* Eye;
 	glm::mat4* ModelTransform;
-	
+
 	DRAW_TYPE type;
 
 	GLuint VertexArrayID;
@@ -27,10 +27,15 @@ class Model {
 	GLuint IndexBufferID;
 	GLuint NormalBufferID;
 	GLuint ColorBufferID;
-public:
+	public:
 	GLuint GLSLProgramID;
 	GLuint PickingProgramID;
 	int objectID = -1;
+
+	// For Homework 3 (begin)
+	std::vector<int> parentsID;
+	std::vector<int> childrenID;
+	// For Homework 3 (end)
 
 	Model();
 	void add_vertex(float, float, float);
@@ -49,6 +54,16 @@ public:
 	void draw(void);
 	void drawPicking(void);
 	void cleanup(void);
+	// For Homework 3 (begin)
+	void add_parent(std::vector<int>);
+	int remove_parent(int);
+	void clear_parent();
+	int find_parent(int);
+	void add_child(std::vector<int>);
+	int remove_child(int);
+	void clear_children();
+	int find_child(int);
+	// For Homework 3 (end)
 };
 
 #endif
