@@ -108,103 +108,103 @@ void updateMouseBools(){
 	mouseFirst = leftMouseFirst || rightMouseFirst || middleMouseFirst;
 }
 
-void resetRubik(){
-	for(int r = 0; r < 3; r++){
-		for(int c = 0; c < 3; c++){
-			rubikRBT[r][c] = translate((float) r * 1.02f / 3.0f - 1.02f / 3.0f, (float) c * 1.02f / 3.0f - 1.02f / 3.0f, 0.0f) * scale(vec3(1 / 3.0f, 1 / 3.0f, 1 / 3.0f));
-			rubik[r * 3 + c].clear_parent();
-			rubik[r * 3 + c].clear_children();
-		}
-	}
-	rubik[0].add_parent(veci{1, 3});
-	rubik[1].add_parent(veci{4});
-	rubik[2].add_parent(veci{1, 5});
-	rubik[3].add_parent(veci{4});
-	rubik[5].add_parent(veci{4});
-	rubik[6].add_parent(veci{3, 7});
-	rubik[7].add_parent(veci{4});
-	rubik[8].add_parent(veci{5, 7});
-	rubik[1].add_child(veci{0, 2});
-	rubik[3].add_child(veci{0, 6});
-	rubik[4].add_child(veci{1, 3, 5, 7});
-	rubik[5].add_child(veci{2, 8});
-	rubik[7].add_child(veci{6, 8});
-}
-
-void sever(int idSelf, int idSever){
-	rubik[idSelf].remove_parent(idSever);
-	rubik[idSever].remove_child(idSelf);
-}
-
-void create(int idSelf, int idCreate){
-	rubik[idSelf].add_parent(veci{idCreate});
-	rubik[idCreate].add_child(veci{idSelf});
-}
-
-void reconnect(int idSelf, int idSever, int idCreate){
-	sever(idSelf, idSever);
-	create(idSelf, idCreate);
-}
-
-int findCommonParent(int first, int second){
-	if(!rubik[second].parentsID.empty()){
-		for(auto a = rubik[second].parentsID.begin(); a != rubik[second].parentsID.end(); a++){
-			if(rubik[first].find_parent(*a) >= 0){
-				return *a;
-			}
-		}
-	}
-
-	return -1;
-}
-
-int checkPick(int first, int second){
-	int tmp;
-	isMainObject = false;
-	previous_object = select_object;
-	if((tmp = rubik[first].find_parent(second) >= 0) || rubik[second].find_parent(first) >= 0){
-		if(tmp >= 0){
-			if(second == 4 && (first == 3 || first == 5)){
-				isCenterYAxis = true;
-			}
-			else{
-				isCenterYAxis = false;
-			}
-			return second;
-		}
-		else{
-			if(first == 4 && (second == 3 || second == 5)){
-				isCenterYAxis = true;
-			}
-			else{
-				isCenterYAxis = false;
-			}
-			return first;
-		}
-	}
-	else if((tmp = findCommonParent(first, second)) >= 0){
-		if(tmp == 4){
-			if((first + second) / 2 == 4){
-				if(first == 3 || first == 5){
-					isCenterYAxis = true;
-				}
-				else{
-					isCenterYAxis = false;
-				}
-				return tmp;
-			}
-		}
-		else{
-			return tmp;
-		}
-	}
-	else if(first == second){
-		isMainObject = true;
-		return 4;
-	}
-
-	return -1;
-}
+//void resetRubik(){
+//	for(int r = 0; r < 3; r++){
+//		for(int c = 0; c < 3; c++){
+//			rubikRBT[r][c] = translate((float) r * 1.02f / 3.0f - 1.02f / 3.0f, (float) c * 1.02f / 3.0f - 1.02f / 3.0f, 0.0f) * scale(vec3(1 / 3.0f, 1 / 3.0f, 1 / 3.0f));
+//			rubik[r * 3 + c].clear_parent();
+//			rubik[r * 3 + c].clear_children();
+//		}
+//	}
+//	rubik[0].add_parent(veci{1, 3});
+//	rubik[1].add_parent(veci{4});
+//	rubik[2].add_parent(veci{1, 5});
+//	rubik[3].add_parent(veci{4});
+//	rubik[5].add_parent(veci{4});
+//	rubik[6].add_parent(veci{3, 7});
+//	rubik[7].add_parent(veci{4});
+//	rubik[8].add_parent(veci{5, 7});
+//	rubik[1].add_child(veci{0, 2});
+//	rubik[3].add_child(veci{0, 6});
+//	rubik[4].add_child(veci{1, 3, 5, 7});
+//	rubik[5].add_child(veci{2, 8});
+//	rubik[7].add_child(veci{6, 8});
+//}
+//
+//void sever(int idSelf, int idSever){
+//	rubik[idSelf].remove_parent(idSever);
+//	rubik[idSever].remove_child(idSelf);
+//}
+//
+//void create(int idSelf, int idCreate){
+//	rubik[idSelf].add_parent(veci{idCreate});
+//	rubik[idCreate].add_child(veci{idSelf});
+//}
+//
+//void reconnect(int idSelf, int idSever, int idCreate){
+//	sever(idSelf, idSever);
+//	create(idSelf, idCreate);
+//}
+//
+//int findCommonParent(int first, int second){
+//	if(!rubik[second].parentsID.empty()){
+//		for(auto a = rubik[second].parentsID.begin(); a != rubik[second].parentsID.end(); a++){
+//			if(rubik[first].find_parent(*a) >= 0){
+//				return *a;
+//			}
+//		}
+//	}
+//
+//	return -1;
+//}
+//
+//int checkPick(int first, int second){
+//	int tmp;
+//	isMainObject = false;
+//	previous_object = select_object;
+//	if((tmp = rubik[first].find_parent(second) >= 0) || rubik[second].find_parent(first) >= 0){
+//		if(tmp >= 0){
+//			if(second == 4 && (first == 3 || first == 5)){
+//				isCenterYAxis = true;
+//			}
+//			else{
+//				isCenterYAxis = false;
+//			}
+//			return second;
+//		}
+//		else{
+//			if(first == 4 && (second == 3 || second == 5)){
+//				isCenterYAxis = true;
+//			}
+//			else{
+//				isCenterYAxis = false;
+//			}
+//			return first;
+//		}
+//	}
+//	else if((tmp = findCommonParent(first, second)) >= 0){
+//		if(tmp == 4){
+//			if((first + second) / 2 == 4){
+//				if(first == 3 || first == 5){
+//					isCenterYAxis = true;
+//				}
+//				else{
+//					isCenterYAxis = false;
+//				}
+//				return tmp;
+//			}
+//		}
+//		else{
+//			return tmp;
+//		}
+//	}
+//	else if(first == second){
+//		isMainObject = true;
+//		return 4;
+//	}
+//
+//	return -1;
+//}
 
 //void syncRubic(int topID){
 //	if(topID >= 0){
@@ -301,7 +301,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 			pickedTarget1 = pick((int) xpos, (int) ypos, frameBufferWidth, frameBufferHeight);
 			if(pickedTarget1 > 0){
 				isPicking = false;
-				select_object = checkPick(pickedTarget0 - 1, pickedTarget1 - 1);
+				//select_object = checkPick(pickedTarget0 - 1, pickedTarget1 - 1);
 				pickedTarget0 = pickedTarget1 = -1;
 				if(select_object < 0){
 					std::cout << "Selection invalid." << std::endl;
@@ -489,7 +489,7 @@ int main(void){
 			vec3(0.0f, 1.0f, 1.0f),
 			vec3(0.0f, 0.0f, 1.0f),
 			vec3(1.0f, 0.0f, 1.0f)};
-		init_rubik(rubik[a], tmp);
+		//init_rubik(rubik[a], tmp);
 		rubik[a].initialize(DRAW_TYPE::ARRAY, "VertexShader.glsl", "FragmentShader.glsl");
 		rubik[a].initialize_picking("PickingVertexShader.glsl", "PickingFragmentShader.glsl");
 		rubik[a].set_projection(&Projection);
@@ -498,7 +498,7 @@ int main(void){
 
 		rubik[a].objectID = a + 1;
 	}
-	resetRubik();
+	//resetRubik();
 
 	// TODO: Initialize arcBall
 	// Initialize your arcBall with DRAW_TYPE::INDEX (it uses GL_ELEMENT_ARRAY_BUFFER to draw sphere)
