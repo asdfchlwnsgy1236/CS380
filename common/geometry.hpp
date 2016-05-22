@@ -55,7 +55,7 @@ void init_cube(Model &model, glm::vec3 color)
 	quad(model, 5, 4, 0, 1, color);
 }
 
-void init_rubik(Model& model, glm::vec3* colors)
+void init_rubic(Model& model, glm::vec3* colors)
 {
 	quad(model, 1, 0, 3, 2, colors[0]);
 	quad(model, 2, 3, 7, 6, colors[4]);
@@ -123,6 +123,15 @@ void init_sphere(Model &model)
 			model.add_index((r + 1) * sectors + s); // 3
 			model.add_index(r * sectors + (s + 1)); // 2
 		}
+	}
+}
+
+void init_obj(Model &model, char *path, glm::vec3 color){
+	bool load = model.loadOBJ(path, color);
+	if (!load){
+		std::cout << "imposible to load OBJ file" << std::endl;
+		system("pause");
+		exit(1);
 	}
 }
 

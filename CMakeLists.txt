@@ -91,7 +91,7 @@ target_link_libraries(Lab2 ${ALL_LIBS})
 set_target_properties(Lab2 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Lab2/")
 create_target_launcher(Lab2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Lab2/")
 
-# Project 2: Object manipulation with arcball
+# Homework 2: Object manipulation with arcball
 add_executable(Homework2
 	Homework2/main.cpp
 	common/shader.cpp

@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include <vector>
 
 #include "model.hpp"
@@ -6,66 +9,75 @@
 
 using namespace std;
 
-Model::Model(){
+Model::Model()
+{
 	// Initialize model information
 	vertices = std::vector<glm::vec3>();
 	indices = std::vector<unsigned int>();
 	normals = std::vector<glm::vec3>();
 	colors = std::vector<glm::vec3>();
-	// For Homework 3 (begin)
-	parentsID = std::vector<int>();
-	childrenID = std::vector<int>();
-	// For Homework 3 (end)
 }
 
-void Model::add_vertex(float x, float y, float z){
+void Model::add_vertex(float x, float y, float z)
+{
 	vertices.push_back(glm::vec3(x, y, z));
 }
 
-void Model::add_vertex(glm::vec3 vertex){
+void Model::add_vertex(glm::vec3 vertex)
+{
 	vertices.push_back(vertex);
 }
 
-void Model::add_normal(float x, float y, float z){
+void Model::add_normal(float x, float y, float z)
+{
 	normals.push_back(glm::vec3(x, y, z));
 }
 
-void Model::add_normal(glm::vec3 normal){
+void Model::add_normal(glm::vec3 normal)
+{
 	normals.push_back(normal);
 }
 
-void Model::add_color(float r, float g, float b){
+void Model::add_color(float r, float g, float b)
+{
 	colors.push_back(glm::vec3(r, g, b));
 }
 
-void Model::add_color(glm::vec3 color){
+void Model::add_color(glm::vec3 color)
+{
 	colors.push_back(color);
 }
 
-void Model::add_index(unsigned int idx){
+void Model::add_index(unsigned int idx)
+{
 	indices.push_back(idx);
 }
 
-void Model::set_projection(glm::mat4* projection){
+void Model::set_projection(glm::mat4* projection)
+{
 	this->Projection = projection;
 }
 
-void Model::set_eye(glm::mat4* eye){
+void Model::set_eye(glm::mat4* eye)
+{
 	this->Eye = eye;
 }
 
-void Model::set_model(glm::mat4* model){
+void Model::set_model(glm::mat4* model)
+{
 	this->ModelTransform = model;
 }
 
-glm::mat4* Model::get_model(){
+glm::mat4* Model::get_model()
+{
 	return this->ModelTransform;
 }
 
-void Model::initialize(DRAW_TYPE type, const char * vertexShader_path, const char * fragmentShader_path){
+void Model::initialize(DRAW_TYPE type, const char * vertexShader_path, const char * fragmentShader_path)
+{
 	this->GLSLProgramID = LoadShaders(vertexShader_path, fragmentShader_path);
 	this->type = type;
-
+	
 	glGenVertexArrays(1, &this->VertexArrayID);
 	glBindVertexArray(this->VertexArrayID);
 
@@ -73,26 +85,103 @@ void Model::initialize(DRAW_TYPE type, const char * vertexShader_path, const cha
 	glBindBuffer(GL_ARRAY_BUFFER, this->VertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*this->vertices.size(), &this->vertices[0], GL_STATIC_DRAW);
 
-	if(this->type == DRAW_TYPE::INDEX){
+	if (this->type == DRAW_TYPE::INDEX)
+	{
 		glGenBuffers(1, &this->IndexBufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IndexBufferID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*this->indices.size(), &this->indices[0], GL_STATIC_DRAW);
 	}
 
-	glGenBuffers(1, &this->NormalBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, this->NormalBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*this->normals.size(), &this->normals[0], GL_STATIC_DRAW);
+	//TODO: generate/bind buffer for colors and store the color values
 
-	glGenBuffers(1, &this->ColorBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, this->ColorBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*this->colors.size(), &this->colors[0], GL_STATIC_DRAW);
+
+	//TODO: generate/bind buffer for normals and store the normal values
+
 }
 
-void Model::initialize_picking(const char* picking_vertex_shader, const char* picking_fragment_shader){
+void Model::initialize_picking(const char* picking_vertex_shader, const char* picking_fragment_shader)
+{
 	this->PickingProgramID = LoadShaders(picking_vertex_shader, picking_fragment_shader);
 }
 
-void Model::draw(){
+bool Model::loadOBJ(const char * path,	glm::vec3 color){
+	cout << "Loading OBJ file " << path << "..." << endl;
+	vector<GLushort> elements;
+	vector<glm::vec3> vertices;
+	vector<glm::vec3> normals;
+	ifstream in(path, ios::in);
+	if (!in)
+	{
+		cerr << "Cannot open " << path << endl; exit(1);
+	}
+
+	string line;
+	while (getline(in, line))
+	{
+		if (line.substr(0, 2) == "v ")
+		{
+			istringstream s(line.substr(2));
+			glm::vec3 v; s >> v.x; s >> v.y; s >> v.z; //v.w = 1.0f;
+			vertices.push_back(v);
+			
+		}
+		else if (line.substr(0, 2) == "f ")
+		{
+			istringstream s(line.substr(2));
+			GLushort a, b, c;
+			s >> a; s >> b; s >> c;
+			a--; b--; c--;
+			elements.push_back(a); elements.push_back(b); elements.push_back(c);
+		}		
+		else if (line[0] == '#')
+		{
+			/* ignoring this line */
+		}
+		else
+		{
+			/* ignoring this line */
+		}
+	}
+
+	normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
+		
+	for (int i = 0; i < elements.size(); i += 3)
+	{
+		GLushort ia = elements[i];
+		GLushort ib = elements[i + 1];
+		GLushort ic = elements[i + 2];
+		glm::vec3 normal = glm::normalize(glm::cross(
+			glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
+			glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));				
+		normals[ia] += normal; normals[ib] += normal; normals[ic] += normal;		
+
+		add_vertex(vertices[ia]);
+		add_vertex(vertices[ib]);
+		add_vertex(vertices[ic]);
+		
+		add_color(color);
+		add_color(color);
+		add_color(color);
+	}
+	for (int i = 0; i < normals.size(); i++){
+		normals[i] = glm::normalize(normals[i]);
+	}
+	for (int i = 0; i < elements.size(); i += 3)
+	{
+		GLushort ia = elements[i];
+		GLushort ib = elements[i + 1];
+		GLushort ic = elements[i + 2];
+
+		add_normal(normals[ia]);
+		add_normal(normals[ib]);
+		add_normal(normals[ic]);
+	}
+
+	return true;
+}
+
+void Model::draw()
+{
 	glUseProgram(this->GLSLProgramID);
 	GLuint ProjectionID = glGetUniformLocation(this->GLSLProgramID, "Projection");
 	GLuint EyeID = glGetUniformLocation(this->GLSLProgramID, "Eye");
@@ -105,27 +194,28 @@ void Model::draw(){
 	glBindVertexArray(this->VertexArrayID);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VertexBufferID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), ((GLvoid*) (0)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), ((GLvoid*)(0)));
 
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, this->NormalBufferID);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), ((GLvoid*) (0)));
+	//TODO: pass the color values to vertex shader
 
-	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, this->ColorBufferID);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), ((GLvoid*) (0)));
 
-	if(this->type == DRAW_TYPE::ARRAY){
-		glDrawArrays(GL_TRIANGLES, 0, (GLsizei) this->vertices.size());
+	//TODO: pass the normal values to vertex shader
+
+	
+	if (this->type == DRAW_TYPE::ARRAY)
+	{
+		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
 	}
-	else{
+	else {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IndexBufferID);
-		glDrawElements(GL_TRIANGLES, (GLsizei) this->indices.size(), GL_UNSIGNED_INT, ((GLvoid *) 0));
+		glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, ((GLvoid *)0));
 	}
 }
 
-void Model::drawPicking(){
-	if(this->objectID >= 0){
+void Model::drawPicking()
+{
+	if (this->objectID >= 0) 
+	{
 		glUseProgram(this->PickingProgramID);
 		GLuint ProjectionID = glGetUniformLocation(this->PickingProgramID, "Projection");
 		GLuint EyeID = glGetUniformLocation(this->PickingProgramID, "Eye");
@@ -135,30 +225,32 @@ void Model::drawPicking(){
 		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &(*(this->Projection))[0][0]);
 		glUniformMatrix4fv(EyeID, 1, GL_FALSE, &(*(this->Eye))[0][0]);
 		glUniformMatrix4fv(ModelTransformID, 1, GL_FALSE, &(*(this->ModelTransform))[0][0]);
-
+		
 		float r = ((objectID >> 16) & 0xFF) / 255.0f;
 		float g = ((objectID >> 8) & 0xFF) / 255.0f;
 		float b = (objectID & 0xFF) / 255.0f;
 
-		glm::vec3 objectIDVector = glm::vec3(r, g, b);
+		glm::vec3 objectIDVector = glm::vec3(r,g,b);
 		glUniform3f(objectIDLoc, objectIDVector.x, objectIDVector.y, objectIDVector.z);
 
 		glBindVertexArray(this->VertexArrayID);
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, this->VertexBufferID);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), ((GLvoid*) (0)));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), ((GLvoid*)(0)));
 
-		if(this->type == DRAW_TYPE::ARRAY){
-			glDrawArrays(GL_TRIANGLES, 0, (GLsizei) this->vertices.size());
+		if (this->type == DRAW_TYPE::ARRAY)
+		{
+			glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
 		}
-		else{
+		else {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IndexBufferID);
-			glDrawElements(GL_TRIANGLES, (GLsizei) this->indices.size(), GL_UNSIGNED_INT, ((GLvoid *) 0));
+			glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, ((GLvoid *)0));
 		}
 	}
 }
 
-void Model::cleanup(){
+void Model::cleanup()
+{
 	// Clean up data structures
 	this->vertices.clear();
 	this->vertices.shrink_to_fit();
@@ -172,96 +264,16 @@ void Model::cleanup(){
 	this->colors.clear();
 	this->colors.shrink_to_fit();
 
-	// For Homework 3 (begin)
-	this->parentsID.clear();
-	this->parentsID.shrink_to_fit();
-	this->childrenID.clear();
-	this->childrenID.shrink_to_fit();
-	// For Homework 3 (end)
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
 	// Cleanup VBO and shader
+	glDisableVertexAttribArray(0);
 	glDeleteBuffers(1, &this->VertexBufferID);
-	glDeleteBuffers(1, &this->NormalBufferID);
-	glDeleteBuffers(1, &this->ColorBufferID);
-	if(this->type == DRAW_TYPE::INDEX) glDeleteBuffers(1, &this->IndexBufferID);
+	
+	//TODO: delete color buffer
+	
+	//TODO: delete normal buffer
+	
+	
+	if (this->type == DRAW_TYPE::INDEX) glDeleteBuffers(1, &this->IndexBufferID);
 	glDeleteProgram(this->GLSLProgramID);
 	glDeleteVertexArrays(1, &this->VertexArrayID);
 }
-
-// For Homework 3 (begin)
-void Model::add_parent(std::vector<int> newParentIDs){
-	for(int a : newParentIDs){
-		parentsID.push_back(a);
-	}
-}
-
-int Model::remove_parent(int someID){
-	if(!parentsID.empty()){
-		for(auto a = parentsID.begin(); a != parentsID.end(); a++){
-			if(*a == someID){
-				parentsID.erase(a);
-				return someID;
-			}
-		}
-	}
-
-	return -1;
-}
-
-void Model::clear_parent(){
-	parentsID.clear();
-}
-
-int Model::find_parent(int target){
-	if(!parentsID.empty()){
-		int b = 0;
-		for(auto a = parentsID.begin(); a != parentsID.end(); a++, b++){
-			if(*a == target){
-				return b;
-			}
-		}
-	}
-
-	return -1;
-}
-
-void Model::add_child(std::vector<int> newChildrenIDs){
-	for(int a : newChildrenIDs){
-		childrenID.push_back(a);
-	}
-}
-
-int Model::remove_child(int someID){
-	if(!childrenID.empty()){
-		for(auto a = childrenID.begin(); a != childrenID.end(); a++){
-			if(*a == someID){
-				childrenID.erase(a);
-				return someID;
-			}
-		}
-	}
-
-	return -1;
-}
-
-void Model::clear_children(){
-	childrenID.clear();
-}
-
-int Model::find_child(int target){
-	if(!childrenID.empty()){
-		int b = 0;
-		for(auto a = childrenID.begin(); a != childrenID.end(); a++, b++){
-			if(*a == target){
-				return b;
-			}
-		}
-	}
-
-	return -1;
-}
-// For Homework 3 (end)
