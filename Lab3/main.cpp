@@ -108,9 +108,9 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		prev_x = 0.0f; prev_y = 0.0f;
 	}
 
-	GLfloat tmp = 2.0f, *uniformvalue = &tmp;
-	glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), uniformvalue);
-	std::cout << uniformvalue << " " << *uniformvalue << std::endl;
+	GLfloat tmpf = 2.0f, *tmp = &tmpf;
+	glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp);
+	std::cout << *tmp << std::endl;
 }
 
 void setWrtFrame(){
@@ -274,6 +274,8 @@ void setLightUniforms(float dli, float pli, float si, float sca,
 	GLfloat lightVec3s[7 * 3] = {dlc.x, dlc.y, dlc.z, dld.x, dld.y, dld.z,
 		plc.x, plc.y, plc.z, pll.x, pll.y, pll.z,
 		sc.x, sc.y, sc.z, sl.x, sl.y, sl.z, sd.x, sd.y, sd.z};
+
+	// TODO: Something is wrong here. Only the ground is having its uniforms set.
 
 	for(int a = 0; a < 5; a++){
 		glUniform1fv(glGetUniformLocation(locations[a], "lightFloats"), 4, lightFloats);
