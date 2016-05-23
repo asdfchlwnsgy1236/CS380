@@ -25,8 +25,6 @@ using namespace glm;
 float g_groundSize = 100.0f;
 float g_groundY = -2.5f;
 
-GLuint lightLocGround, lightLocObject[3], lightLocArc;
-
 float dlIntensity, plIntensity, sIntensity, sConeAngle;
 vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection;
 
@@ -263,6 +261,22 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 	}
 }
 
+void setLightUniforms(float dli, float pli, float si, float sca,
+					  vec3 dlc, vec3 dld, vec3 plc, vec3 pll, vec3 sc, vec3 sl, vec3 sd){
+	GLuint locations[5] = {ground.GLSLProgramID,
+		object[0].GLSLProgramID, object[1].GLSLProgramID, object[2].GLSLProgramID,
+		arcBall.GLSLProgramID};
+	GLfloat lightFloats[4] = {dli, pli, si, sca};
+	GLfloat lightVec3s[7 * 3] = {dlc.x, dlc.y, dlc.z, dld.x, dld.y, dld.z,
+		plc.x, plc.y, plc.z, pll.x, pll.y, pll.z,
+		sc.x, sc.y, sc.z, sl.x, sl.y, sl.z, sd.x, sd.y, sd.z};
+
+	for(int a = 0; a < 5; a++){
+		glUniform1fv(glGetUniformLocation(locations[a], "lightFloats"), 4, lightFloats);
+		glUniform3fv(glGetUniformLocation(locations[a], "lightVec3s"), 7, lightVec3s);
+	}
+}
+
 int main(void){
 	// Initialise GLFW
 	if(!glfwInit()){
@@ -344,13 +358,8 @@ int main(void){
 	arcBall.set_model(&arcballRBT);
 
 	//TODO Setting Light Vectors
-	lightLocGround = glGetUniformLocation(ground.GLSLProgramID, "uLight");
-	for(int a = 0; a < 3; a++){
-		lightLocObject[a] = glGetUniformLocation(object[a].GLSLProgramID, "uLight");
-	}
-	lightLocArc = glGetUniformLocation(arcBall.GLSLProgramID, "uLight");
+	setLightUniforms(dlIntensity, plIntensity, sIntensity, sConeAngle, dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
-	vec3 lightVec = vec3(0.0f, 1.0f, 0.0f);
 	do{
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -358,14 +367,7 @@ int main(void){
 		eyeRBT = (view_index == 0) ? skyRBT : objectRBT[1];
 
 		//TODO: pass the light value to the shader
-		lightLocGround = glGetUniformLocation(ground.GLSLProgramID, "uLight");
-		glUniform3f(lightLocGround, lightVec.x, lightVec.y, lightVec.z);
-		for(int a = 0; a < 3; a++){
-			lightLocObject[a] = glGetUniformLocation(object[a].GLSLProgramID, "uLight");
-			glUniform3f(lightLocObject[a], lightVec.x, lightVec.y, lightVec.z);
-		}
-		lightLocArc = glGetUniformLocation(arcBall.GLSLProgramID, "uLight");
-		glUniform3f(lightLocArc, lightVec.x, lightVec.y, lightVec.z);
+		setLightUniforms(dlIntensity, plIntensity, sIntensity, sConeAngle, dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
 		// TODO: draw OBJ model
 		object[0].draw();

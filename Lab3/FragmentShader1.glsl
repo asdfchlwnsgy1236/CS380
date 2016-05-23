@@ -4,7 +4,7 @@ flat in vec3 fragmentPosition;
 flat in vec3 fragmentColor;
 flat in vec3 fragmentNormal;
 
-// Ouput data
+// Output data
 out vec3 color;
 
 

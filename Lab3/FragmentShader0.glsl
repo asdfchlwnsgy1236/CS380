@@ -4,67 +4,67 @@ in vec3 fragmentPosition;
 in vec3 fragmentColor;
 in vec3 fragmentNormal;
 
-// Ouput data
+// Output data
 out vec3 color;
 
-uniform float dlIntensity, plIntensity, sIntensity, sConeAngle;
-uniform vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection;
+uniform float lightFloats[4]; // dlIntensity, plIntensity, sIntensity, sConeAngle
+uniform vec3 lightVec3s[7]; // dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection
 
 vec3 shininess = vec3(0.5, 0.5, 0.5);
 
 vec3 applyDL(){
-	if(dlIntensity == 0.0){
+	if(lightFloats[0] == 0.0){
 		return vec3();
 	}
 	
-	vec3 tolight = -dlDirection, 
+	vec3 tolight = -lightVec3s[1], 
 	toV = -normalize(fragmentPosition), 
 	half = normalize(toV + tolight), 
 	normal = normalize(fragmentNormal);
 	float diffuseCo = max(0.0, dot(normal, tolight));
-	vec3 diffuse = diffuseCo * fragmentColor * dlColor * dlIntensity;
+	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[0] * lightFloats[0];
 	float specularCo = pow(max(0.0, dot(half, normal)), 64.0);
-	vec3 specular = specularCo * shininess * dlColor * dlIntensity;
+	vec3 specular = specularCo * shininess * lightVec3s[0] * lightFloats[0];
 	
 	return diffuse + specular;
 }
 
 vec3 applyPL(){
-	if(plIntensity == 0.0){
+	if(lightFloats[1] == 0.0){
 		return vec3();
 	}
 	
-	vec3 tolight = normalize(plLocation - fragmentPosition), 
+	vec3 tolight = normalize(lightVec3s[3] - fragmentPosition), 
 	toV = -normalize(fragmentPosition), 
 	half = normalize(toV + tolight), 
 	normal = normalize(fragmentNormal);
 	float diffuseCo = max(0.0, dot(normal, tolight));
-	vec3 diffuse = diffuseCo * fragmentColor * plColor * plIntensity;
+	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[2] * lightFloats[1];
 	float specularCo = pow(max(0.0, dot(half, normal)), 64.0);
-	vec3 specular = specularCo * shininess * plColor * plIntensity;
-	float dist = distance(plLocation, fragmentPosition), 
+	vec3 specular = specularCo * shininess * lightVec3s[2] * lightFloats[1];
+	float dist = distance(lightVec3s[3], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + pow(dist, 2));
 	
 	return (diffuse + specular) * attenuation;
 }
 
 vec3 applyS(){
-	if(sIntensity == 0.0){
+	if(lightFloats[2] == 0.0){
 		return vec3();
 	}
 	
-	vec3 tolight = normalize(sLocation - fragmentPosition), 
+	vec3 tolight = normalize(lightVec3s[5] - fragmentPosition), 
 	toV = -normalize(fragmentPosition), 
 	half = normalize(toV + tolight), 
 	normal = normalize(fragmentNormal);
 	float diffuseCo = max(0.0, dot(normal, tolight));
-	vec3 diffuse = diffuseCo * fragmentColor * sColor * sIntensity;
+	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[4] * lightFloats[2];
 	float specularCo = pow(max(0.0, dot(half, normal)), 64.0);
-	vec3 specular = specularCo * shininess * sColor * sIntensity;
-	float dist = distance(sLocation, fragmentPosition), 
+	vec3 specular = specularCo * shininess * lightVec3s[4] * lightFloats[2];
+	float dist = distance(lightVec3s[5], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + pow(dist, 2)), 
-	ltofa = acos(dot(-tolight, sDirection));
-	if(ltofa > sConeAngle){
+	ltofa = acos(dot(-tolight, lightVec3s[6]));
+	if(ltofa > lightFloats[3]){
 		attenuation = 0.0;
 	}
 	

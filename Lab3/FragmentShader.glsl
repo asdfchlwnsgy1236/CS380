@@ -7,7 +7,7 @@ in vec3 fragmentNormal;
 // for Gouraud shading
 in vec3 gcolor;
 
-// Ouput data
+// Output data
 out vec3 color;
 
 
