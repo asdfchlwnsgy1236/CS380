@@ -16,10 +16,6 @@ uniform mat4 ModelTransform;
 uniform mat4 Eye;
 uniform mat4 Projection;
 
-
-
-
-
 void main(){
 	// Output position of the vertex, in clip space : MVP * position
 	mat4 MVM = inverse(Eye) * ModelTransform;

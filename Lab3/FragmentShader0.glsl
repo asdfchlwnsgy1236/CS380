@@ -71,6 +71,14 @@ vec3 applyS(){
 	return (diffuse + specular) * attenuation;
 }
 
+vec3 applyLight(){
+	return applyDL() + applyPL() + applyS();
+}
+
+vec3 applyGC(vec3 before){
+	return pow(before, vec3(1.0 / 2.2));
+}
+
 void main(){
-	color = pow(applyDL() + applyPL() + applyS(), vec3(1.0 / 2.2));
+	color = applyGC(applyLight());
 }

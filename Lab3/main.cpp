@@ -358,6 +358,7 @@ int main(void){
 	arcBall.set_model(&arcballRBT);
 
 	//TODO Setting Light Vectors
+	dlIntensity = 1.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
 	setLightUniforms(dlIntensity, plIntensity, sIntensity, sConeAngle, dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
 	do{
