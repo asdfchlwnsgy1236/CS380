@@ -107,6 +107,10 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	if(action == GLFW_RELEASE){
 		prev_x = 0.0f; prev_y = 0.0f;
 	}
+
+	GLfloat tmp = 2.0f, *uniformvalue = &tmp;
+	glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), uniformvalue);
+	std::cout << uniformvalue << " " << *uniformvalue << std::endl;
 }
 
 void setWrtFrame(){
@@ -352,7 +356,6 @@ int main(void){
 	arcBall = Model();
 	init_sphere(arcBall);
 	arcBall.initialize(DRAW_TYPE::INDEX, "VertexShader.glsl", "FragmentShader.glsl");
-
 	arcBall.set_projection(&Projection);
 	arcBall.set_eye(&eyeRBT);
 	arcBall.set_model(&arcballRBT);
@@ -371,13 +374,9 @@ int main(void){
 		setLightUniforms(dlIntensity, plIntensity, sIntensity, sConeAngle, dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
 		// TODO: draw OBJ model
-		object[0].draw();
-		glShadeModel(GL_FLAT);
-		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
-		object[1].draw();
-		glProvokingVertex(GL_LAST_VERTEX_CONVENTION);
-		glShadeModel(GL_SMOOTH);
-		object[2].draw();
+		for(int a = 0; a < 3; a++){
+			object[a].draw();
+		}
 
 		// Draw wireframe of arcBall with dynamic radius
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
