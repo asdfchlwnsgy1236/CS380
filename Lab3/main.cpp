@@ -25,7 +25,7 @@ using namespace glm;
 float g_groundSize = 100.0f;
 float g_groundY = -2.5f;
 
-float dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle;
+float dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle; // sConeAngle needs to be in radians
 vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection;
 
 // View properties
@@ -364,8 +364,8 @@ int main(void){
 
 	//TODO Setting Light Vectors
 	//dlIntensity = 1.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
-	plIntensity = 1.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 0.0f, 1.0f);
-	//sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = 6.0f, sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
+	//plIntensity = 1.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 1.0f, 0.0f);
+	sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(60.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
 	setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
 					 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
@@ -376,6 +376,18 @@ int main(void){
 		eyeRBT = (view_index == 0) ? skyRBT : objectRBT[1];
 
 		//TODO: pass the light value to the shader
+		if(length2(dlDirection) > 0.0f){
+			dlDirection = normalize(dlDirection);
+		}
+		else{
+			dlIntensity = 0.0f;
+		}
+		if(length2(sDirection) > 0.0f){
+			sDirection = normalize(sDirection);
+		}
+		else{
+			sIntensity = 0.0f;
+		}
 		setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
 						 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
