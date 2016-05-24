@@ -11,6 +11,7 @@ layout(location = 1) in vec3 vertexNormal_modelspace;
 out vec3 fragmentPosition;
 out vec3 fragmentColor;
 out vec3 fragmentNormal;
+out vec3 fragmentNormalAlt;
 
 uniform mat4 ModelTransform;
 uniform mat4 Eye;
@@ -28,7 +29,8 @@ void main(){
 	fragmentColor = vertexColor;
 	//TODO: Calculate/Pass normal of the the vertex
 	//transpose of inversed model matrix
-	mat4 NM = transpose(inverse(ModelTransform));
+	mat4 NM = transpose(inverse(ModelTransform)), NVM = transpose(inverse(MVM));
 	vec4 tnormal = vec4(vertexNormal_modelspace, 0.0);
 	fragmentNormal = vec3(NM * tnormal);
+	fragmentNormalAlt = vec3(NVM * tnormal);
 }

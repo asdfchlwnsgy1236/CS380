@@ -3,6 +3,7 @@
 flat in vec3 fragmentPosition;
 flat in vec3 fragmentColor;
 flat in vec3 fragmentNormal;
+flat in vec3 fragmentNormalAlt;
 
 // Output data
 out vec3 color;
@@ -22,10 +23,11 @@ vec3 applyDL(){
 	vec3 tolight = normalize(-lightVec3s[1] - worldFP), 
 	toV = -normalize(fragmentPosition), 
 	hv = normalize(toV + tolight), 
-	normal = normalize(fragmentNormal);
+	normal = normalize(fragmentNormal), 
+	normalAlt = normalize(fragmentNormalAlt);
 	float diffuseCo = max(0.0, dot(normal, tolight));
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[0] * lightFloats[0];
-	float specularCo = pow(max(0.0, dot(hv, normal)), 64.0);
+	float specularCo = pow(max(0.0, dot(hv, normalAlt)), 64.0);
 	vec3 specular = specularCo * shininess * lightVec3s[0] * lightFloats[0];
 	
 	return ambient + diffuse + specular;
@@ -39,10 +41,11 @@ vec3 applyPL(){
 	vec3 tolight = normalize(lightVec3s[3] - worldFP), 
 	toV = -normalize(fragmentPosition), 
 	hv = normalize(toV + tolight), 
-	normal = normalize(fragmentNormal);
+	normal = normalize(fragmentNormal), 
+	normalAlt = normalize(fragmentNormalAlt);
 	float diffuseCo = max(0.0, dot(normal, tolight));
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[2] * lightFloats[1];
-	float specularCo = pow(max(0.0, dot(hv, normal)), 64.0);
+	float specularCo = pow(max(0.0, dot(hv, normalAlt)), 64.0);
 	vec3 specular = specularCo * shininess * lightVec3s[2] * lightFloats[1];
 	float dist = distance(lightVec3s[3], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + lightFloats[2] * pow(dist, 2));
@@ -58,10 +61,11 @@ vec3 applyS(){
 	vec3 tolight = normalize(lightVec3s[5] - fragmentPosition), 
 	toV = -normalize(fragmentPosition), 
 	hv = normalize(toV + tolight), 
-	normal = normalize(fragmentNormal);
+	normal = normalize(fragmentNormal), 
+	normalAlt = normalize(fragmentNormalAlt);
 	float diffuseCo = max(0.0, dot(normal, tolight));
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[4] * lightFloats[3];
-	float specularCo = pow(max(0.0, dot(hv, normal)), 64.0);
+	float specularCo = pow(max(0.0, dot(hv, normalAlt)), 64.0);
 	vec3 specular = specularCo * shininess * lightVec3s[4] * lightFloats[3];
 	float dist = distance(lightVec3s[5], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + lightFloats[4] * pow(dist, 2)), 
