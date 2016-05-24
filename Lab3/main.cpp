@@ -108,13 +108,13 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		prev_x = 0.0f; prev_y = 0.0f;
 	}
 
-	GLfloat tmpf = 2.0f, *tmp0 = &tmpf, *tmp1 = &tmpf, *tmp2 = &tmpf, *tmp3 = &tmpf, *tmp4 = &tmpf;
-	glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), tmp0);
-	glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp1);
-	glGetUniformfv(object[1].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp2);
-	glGetUniformfv(object[2].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp3);
-	glGetUniformfv(arcBall.GLSLProgramID, glGetUniformLocation(arcBall.GLSLProgramID, "lightFloats"), tmp4);
-	std::cout << *tmp0 << " " << *tmp1 << " " << *tmp2 << " " << *tmp3 << " " << *tmp4 << std::endl;
+	//GLfloat tmpf = 2.0f, *tmp0 = &tmpf, *tmp1 = &tmpf, *tmp2 = &tmpf, *tmp3 = &tmpf, *tmp4 = &tmpf;
+	//glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), tmp0);
+	//glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp1);
+	//glGetUniformfv(object[1].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp2);
+	//glGetUniformfv(object[2].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp3);
+	//glGetUniformfv(arcBall.GLSLProgramID, glGetUniformLocation(arcBall.GLSLProgramID, "lightFloats"), tmp4);
+	//std::cout << *tmp0 << " " << *tmp1 << " " << *tmp2 << " " << *tmp3 << " " << *tmp4 << std::endl;
 }
 
 void setWrtFrame(){
