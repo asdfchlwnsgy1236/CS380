@@ -13,7 +13,7 @@ uniform vec3 lightVec3s[7]; // dlColor, dlDirection, plColor, plLocation, sColor
 
 uniform mat4 Eye;
 
-vec3 worldFP = vec3(Eye * vec4(fragmentPosition, 1.0)), shininess = vec3(0.5, 0.5, 0.5), ambient = vec3(0.03, 0.03, 0.03);
+vec3 worldFP = vec3(Eye * vec4(fragmentPosition, 1.0)), shininess = vec3(0.5), ambient = vec3(0.0012);
 
 vec3 applyDL(){
 	if(lightFloats[0] == 0.0){

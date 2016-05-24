@@ -26,7 +26,8 @@ float g_groundSize = 100.0f;
 float g_groundY = -2.5f;
 
 float dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle; // sConeAngle needs to be in radians
-vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection;
+vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection,
+postdlDirection, postplLocation, postsLocation, postsDirection;
 
 // View properties
 glm::mat4 Projection;
@@ -269,6 +270,13 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 	}
 }
 
+void setPostVec3s(){
+	postdlDirection = normalize(vec3(inverse(eyeRBT) * vec4(dlDirection, 0.0f)));
+	postplLocation = vec3(inverse(eyeRBT) * vec4(plLocation, 1.0f));
+	postsLocation = vec3(inverse(eyeRBT) * vec4(sLocation, 1.0f));
+	postsDirection = normalize(vec3(inverse(eyeRBT) * vec4(sDirection, 0.0f)));
+}
+
 void setLightUniforms(float dli, float pli, float plar, float si, float sar, float sca,
 					  vec3 dlc, vec3 dld, vec3 plc, vec3 pll, vec3 sc, vec3 sl, vec3 sd){
 	Model models[5] = {ground, object[0], object[1], object[2], arcBall};
@@ -327,7 +335,7 @@ int main(void){
 	glDepthFunc(GL_LESS);
 
 	Projection = glm::perspective(fov, windowWidth / windowHeight, 0.1f, 100.0f);
-	skyRBT = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.25, 4.0));
+	skyRBT = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.25f, 4.0f));
 
 	aFrame = linearFact(skyRBT);
 
@@ -365,9 +373,7 @@ int main(void){
 	//TODO Setting Light Vectors
 	//dlIntensity = 1.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
 	//plIntensity = 1.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 1.0f, 0.0f);
-	sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(60.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
-	setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
-					 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
+	sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(22.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
 
 	do{
 		// Clear the screen
@@ -388,8 +394,9 @@ int main(void){
 		else{
 			sIntensity = 0.0f;
 		}
+		setPostVec3s();
 		setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
-						 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
+						 dlColor, postdlDirection, plColor, postplLocation, sColor, postsLocation, postsDirection);
 
 		// TODO: draw OBJ model
 		for(int a = 0; a < 3; a++){
