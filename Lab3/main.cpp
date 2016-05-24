@@ -108,9 +108,13 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		prev_x = 0.0f; prev_y = 0.0f;
 	}
 
-	GLfloat tmpf = 2.0f, *tmp = &tmpf;
-	glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp);
-	std::cout << *tmp << std::endl;
+	GLfloat tmpf = 2.0f, *tmp0 = &tmpf, *tmp1 = &tmpf, *tmp2 = &tmpf, *tmp3 = &tmpf, *tmp4 = &tmpf;
+	glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), tmp0);
+	glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp1);
+	glGetUniformfv(object[1].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp2);
+	glGetUniformfv(object[2].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp3);
+	glGetUniformfv(arcBall.GLSLProgramID, glGetUniformLocation(arcBall.GLSLProgramID, "lightFloats"), tmp4);
+	std::cout << *tmp0 << " " << *tmp1 << " " << *tmp2 << " " << *tmp3 << " " << *tmp4 << std::endl;
 }
 
 void setWrtFrame(){
@@ -267,19 +271,15 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 
 void setLightUniforms(float dli, float pli, float si, float sca,
 					  vec3 dlc, vec3 dld, vec3 plc, vec3 pll, vec3 sc, vec3 sl, vec3 sd){
-	GLuint locations[5] = {ground.GLSLProgramID,
-		object[0].GLSLProgramID, object[1].GLSLProgramID, object[2].GLSLProgramID,
-		arcBall.GLSLProgramID};
+	Model models[5] = {ground, object[0], object[1], object[2], arcBall};
 	GLfloat lightFloats[4] = {dli, pli, si, sca};
 	GLfloat lightVec3s[7 * 3] = {dlc.x, dlc.y, dlc.z, dld.x, dld.y, dld.z,
 		plc.x, plc.y, plc.z, pll.x, pll.y, pll.z,
 		sc.x, sc.y, sc.z, sl.x, sl.y, sl.z, sd.x, sd.y, sd.z};
 
-	// TODO: Something is wrong here. Only the ground is having its uniforms set.
-
 	for(int a = 0; a < 5; a++){
-		glUniform1fv(glGetUniformLocation(locations[a], "lightFloats"), 4, lightFloats);
-		glUniform3fv(glGetUniformLocation(locations[a], "lightVec3s"), 7, lightVec3s);
+		glProgramUniform1fv(models[a].GLSLProgramID, glGetUniformLocation(models[a].GLSLProgramID, "lightFloats"), 4, lightFloats);
+		glProgramUniform3fv(models[a].GLSLProgramID, glGetUniformLocation(models[a].GLSLProgramID, "lightVec3s"), 7, lightVec3s);
 	}
 }
 
@@ -357,7 +357,7 @@ int main(void){
 
 	arcBall = Model();
 	init_sphere(arcBall);
-	arcBall.initialize(DRAW_TYPE::INDEX, "VertexShader.glsl", "FragmentShader.glsl");
+	arcBall.initialize(DRAW_TYPE::INDEX, "VertexShader_.glsl", "FragmentShader_.glsl");
 	arcBall.set_projection(&Projection);
 	arcBall.set_eye(&eyeRBT);
 	arcBall.set_model(&arcballRBT);
