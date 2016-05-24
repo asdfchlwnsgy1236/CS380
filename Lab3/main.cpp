@@ -25,7 +25,7 @@ using namespace glm;
 float g_groundSize = 100.0f;
 float g_groundY = -2.5f;
 
-float dlIntensity, plIntensity, sIntensity, sConeAngle;
+float dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle;
 vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection;
 
 // View properties
@@ -269,16 +269,16 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 	}
 }
 
-void setLightUniforms(float dli, float pli, float si, float sca,
+void setLightUniforms(float dli, float pli, float plar, float si, float sar, float sca,
 					  vec3 dlc, vec3 dld, vec3 plc, vec3 pll, vec3 sc, vec3 sl, vec3 sd){
 	Model models[5] = {ground, object[0], object[1], object[2], arcBall};
-	GLfloat lightFloats[4] = {dli, pli, si, sca};
+	GLfloat lightFloats[6] = {dli, pli, plar, si, sar, sca};
 	GLfloat lightVec3s[7 * 3] = {dlc.x, dlc.y, dlc.z, dld.x, dld.y, dld.z,
 		plc.x, plc.y, plc.z, pll.x, pll.y, pll.z,
 		sc.x, sc.y, sc.z, sl.x, sl.y, sl.z, sd.x, sd.y, sd.z};
 
 	for(int a = 0; a < 5; a++){
-		glProgramUniform1fv(models[a].GLSLProgramID, glGetUniformLocation(models[a].GLSLProgramID, "lightFloats"), 4, lightFloats);
+		glProgramUniform1fv(models[a].GLSLProgramID, glGetUniformLocation(models[a].GLSLProgramID, "lightFloats"), 6, lightFloats);
 		glProgramUniform3fv(models[a].GLSLProgramID, glGetUniformLocation(models[a].GLSLProgramID, "lightVec3s"), 7, lightVec3s);
 	}
 }
@@ -364,9 +364,10 @@ int main(void){
 
 	//TODO Setting Light Vectors
 	//dlIntensity = 1.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
-	plIntensity = 1.0f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 0.0f, 1.0f);
-	//sIntensity = 1.0f, sConeAngle = 6.0f, sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
-	setLightUniforms(dlIntensity, plIntensity, sIntensity, sConeAngle, dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
+	plIntensity = 1.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 0.0f, 1.0f);
+	//sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = 6.0f, sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
+	setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
+					 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
 	do{
 		// Clear the screen
@@ -375,7 +376,8 @@ int main(void){
 		eyeRBT = (view_index == 0) ? skyRBT : objectRBT[1];
 
 		//TODO: pass the light value to the shader
-		setLightUniforms(dlIntensity, plIntensity, sIntensity, sConeAngle, dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
+		setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
+						 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
 		// TODO: draw OBJ model
 		for(int a = 0; a < 3; a++){
