@@ -10,14 +10,12 @@
 // Picking Pass Rendering
 GLuint picking_fbo;
 GLuint picking_tex;
-GLuint picking_depth;
 
 inline void picking_initialize(int frameBufferWidth, int frameBufferHeight)
 {
 	glGenFramebuffers(1, &picking_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, picking_fbo);
 
-	// Create the texture object for the primitive information buffer
 	glGenTextures(1, &picking_tex);
 	glBindTexture(GL_TEXTURE_2D, picking_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -26,13 +24,7 @@ inline void picking_initialize(int frameBufferWidth, int frameBufferHeight)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, frameBufferWidth, frameBufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 
-	// Attach to primitive texture image to a framebuffer object
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, picking_tex, 0);
-	
-	glGenRenderbuffers(1, &picking_depth);
-	glBindRenderbuffer(GL_RENDERBUFFER, picking_depth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, frameBufferWidth, frameBufferHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, picking_depth);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, picking_tex, 0);
 
 	glReadBuffer(GL_NONE);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -52,9 +44,8 @@ inline void picking_initialize(int frameBufferWidth, int frameBufferHeight)
 inline void reallocate_picking_texture(int frameBufferWidth, int frameBufferHeight)
 {
 	glDeleteTextures(1, &picking_tex);
-	glDeleteTextures(1, &picking_depth);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, picking_fbo);
+
 	glGenTextures(1, &picking_tex);
 	glBindTexture(GL_TEXTURE_2D, picking_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -62,13 +53,8 @@ inline void reallocate_picking_texture(int frameBufferWidth, int frameBufferHeig
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, frameBufferWidth, frameBufferHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-	// Attach to primitive texture image to a framebuffer object
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, picking_tex, 0);
 
-	glGenRenderbuffers(1, &picking_depth);
-	glBindRenderbuffer(GL_RENDERBUFFER, picking_depth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, frameBufferWidth, frameBufferHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, picking_depth);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, picking_tex, 0);
 
 	glReadBuffer(GL_NONE);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -98,6 +84,9 @@ inline int pick(int xpos, int ypos, int frameBufferWidth, int frameBufferHeight)
 	int b = (int)pixel[2];
 	int targetID = ((r << 16) & 0xFF0000) + ((g << 8) & 0x00FF00) + b & 0xFF;
 
+	std::cout << r << ", " << g << ", " << b << std::endl;
+	std::cout << targetID << std::endl;
+
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
@@ -107,7 +96,6 @@ inline int pick(int xpos, int ypos, int frameBufferWidth, int frameBufferHeight)
 inline void delete_picking_resources()
 {
 	glDeleteTextures(1, &picking_tex);
-	glDeleteRenderbuffers(1, &picking_depth);
 	glDeleteFramebuffers(1, &picking_fbo);
 }
 
