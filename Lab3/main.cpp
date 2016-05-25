@@ -373,7 +373,7 @@ int main(void){
 	//TODO Setting Light Vectors
 	//dlIntensity = 1.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
 	//plIntensity = 1.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 1.0f, 0.0f);
-	sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(22.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
+	sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(6.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
 
 	do{
 		// Clear the screen
