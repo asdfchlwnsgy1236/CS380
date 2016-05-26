@@ -16,7 +16,6 @@ GLFWwindow* window;
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-
 #include <common/shader.hpp>
 #include <common/affine.hpp>
 #include <common/geometry.hpp>
@@ -80,19 +79,19 @@ float arcBallScreenRadius = 0.25f * min(windowWidth, windowHeight);
 float arcBallScale = 0.01f; float ScreenToEyeScale = 0.01f;
 float prev_x = 0.0f; float prev_y = 0.0f;
 
-GLenum  cube[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+GLenum  cube[6] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
+GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
 
-void init_cubeRBT(){	
+void init_cubeRBT(){
 	objectRBT[0] = glm::scale(1.2f, 1.2f, 1.2f) * glm::translate(-1.0f, 0.0f, .0f);
 	objectRBT[1] = glm::scale(1.2f, 1.2f, 1.2f) * glm::translate(1.0f, 0.0f, .0f);
 }
 void set_program(int p){
-	for (int i = 0; i < 2; i++){
+	for(int i = 0; i < 2; i++){
 		cubes[i].GLSLProgramID = addPrograms[p];
 	}
 }
@@ -100,11 +99,11 @@ void init_shader(int idx, const char * vertexShader_path, const char * fragmentS
 	addPrograms[idx] = LoadShaders(vertexShader_path, fragmentShader_path);
 	glUseProgram(addPrograms[idx]);
 }
-void init_cubemap(const char * baseFileName,int size){	
-	glActiveTexture(GL_TEXTURE0+3);
+void init_cubemap(const char * baseFileName, int size){
+	glActiveTexture(GL_TEXTURE0 + 3);
 	glGenTextures(1, &cubeTexID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexID);
-	const char * suffixes[] = { "posx", "negx", "posy", "negy", "posz", "negz" };
+	const char * suffixes[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
 	GLuint targets[] = {
 		GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
 		GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
@@ -112,11 +111,11 @@ void init_cubemap(const char * baseFileName,int size){
 	};
 	GLint w, h;
 	glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, GL_RGBA8, size, size);
-	for (int i = 0; i < 6; i++) {
+	for(int i = 0; i < 6; i++){
 		std::string texName = std::string(baseFileName) + "_" + suffixes[i] + ".bmp";
-		unsigned char* data = loadBMP_cube(texName.c_str(), &w, &h);		
+		unsigned char* data = loadBMP_cube(texName.c_str(), &w, &h);
 		glTexSubImage2D(targets[i], 0, 0, 0, w, h,
-			GL_RGB, GL_UNSIGNED_BYTE, data);
+						GL_BGR, GL_UNSIGNED_BYTE, data);
 		delete[] data;
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -128,29 +127,36 @@ void init_cubemap(const char * baseFileName,int size){
 }
 void init_texture(void){
 	//TODO: Initialize first texture
-	
-	//TODO: Initialize second texture
-	
-	//TODO: Initialize bump texture
-	
-	//TODO: Initialize Cubemap texture	
+	texture[0] = loadBMP_custom("Judy.bmp");
+	for(int a = 0; a < 3; a++){
+		textureID[a][0] = glGetUniformLocation(addPrograms[a], "myTextureSampler");
+	}
 
+	//TODO: Initialize second texture
+	texture[1] = loadBMP_custom("brick.bmp");
+	for(int a = 0; a < 3; a++){
+		textureID[a][1] = glGetUniformLocation(addPrograms[a], "myTextureSampler");
+	}
+
+	//TODO: Initialize bump texture
+	bumpTex = loadBMP_custom("brick_bump.bmp");
+	bumpTexID = glGetUniformLocation(addPrograms[1], "myBumpSampler");
+
+	//TODO: Initialize Cubemap texture
+	init_cubemap("beach", 2048);
 }
-static bool non_ego_cube_manipulation()
-{
+static bool non_ego_cube_manipulation(){
 	return object_index != 0 && view_index != object_index;
 }
 
-static bool use_arcball()
-{
+static bool use_arcball(){
 	return (object_index == 0 && sky_type == 0) || non_ego_cube_manipulation();
 }
 
-static void window_size_callback(GLFWwindow* window, int width, int height)
-{
+static void window_size_callback(GLFWwindow* window, int width, int height){
 	// Get resized size and set to current window
-	windowWidth = (float)width;
-	windowHeight = (float)height;
+	windowWidth = (float) width;
+	windowHeight = (float) height;
 
 	// glViewport accept pixel size, please use glfwGetFramebufferSize rather than window size.
 	// window size != framebuffer size
@@ -159,21 +165,19 @@ static void window_size_callback(GLFWwindow* window, int width, int height)
 
 	arcBallScreenRadius = 0.25f * min(frameBufferWidth, frameBufferHeight);
 
-	if (frameBufferWidth >= frameBufferHeight)
-	{
+	if(frameBufferWidth >= frameBufferHeight){
 		fovy = fov;
 	}
-	else {
+	else{
 		const float RAD_PER_DEG = 0.5f * glm::pi<float>() / 180.0f;
-		fovy = atan2(sin(fov * RAD_PER_DEG) * (float)frameBufferHeight / (float)frameBufferWidth, cos(fov * RAD_PER_DEG)) / RAD_PER_DEG;
+		fovy = atan2(sin(fov * RAD_PER_DEG) * (float) frameBufferHeight / (float) frameBufferWidth, cos(fov * RAD_PER_DEG)) / RAD_PER_DEG;
 	}
 
 	// Update projection matrix
 	Projection = glm::perspective(fov, windowWidth / windowHeight, 0.1f, 100.0f);
 }
 
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
 	MOUSE_LEFT_PRESS |= (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS);
 	MOUSE_RIGHT_PRESS |= (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
 	MOUSE_MIDDLE_PRESS |= (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS);
@@ -182,62 +186,60 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	MOUSE_RIGHT_PRESS &= !(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE);
 	MOUSE_MIDDLE_PRESS &= !(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE);
 
-	if (action == GLFW_RELEASE) {
+	if(action == GLFW_RELEASE){
 		prev_x = 0.0f; prev_y = 0.0f;
 	}
 }
 
-void setWrtFrame()
-{
-	switch (object_index)
-	{
-	case 0:
-		// world-sky: transFact(worldRBT) * linearFact(skyRBT), sky-sky: transFact(skyRBT) * linearFact(skyRBT)
-		aFrame = (sky_type == 0) ? linearFact(skyRBT) : skyRBT;
-		break;
-	case 1:
-		aFrame = transFact(objectRBT[0]) * linearFact(eyeRBT);
-		break;
+void setWrtFrame(){
+	switch(object_index){
+		case 0:
+			// world-sky: transFact(worldRBT) * linearFact(skyRBT), sky-sky: transFact(skyRBT) * linearFact(skyRBT)
+			aFrame = (sky_type == 0) ? linearFact(skyRBT) : skyRBT;
+			break;
+		case 1:
+			aFrame = transFact(objectRBT[0]) * linearFact(eyeRBT);
+			break;
 	}
 }
 
-static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	if (view_index != 0 && object_index == 0) return;
+static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
+	if(view_index != 0 && object_index == 0) return;
 	// Convert mouse pointer into screen space. (http://gamedev.stackexchange.com/questions/83570/why-is-the-origin-in-computer-graphics-coordinates-at-the-top-left)
-	xpos = xpos * ((float)frameBufferWidth / windowWidth);
-	ypos = (float)frameBufferHeight - ypos * ((float)frameBufferHeight / windowHeight) - 1.0f;
+	xpos = xpos * ((float) frameBufferWidth / windowWidth);
+	ypos = (float) frameBufferHeight - ypos * ((float) frameBufferHeight / windowHeight) - 1.0f;
 
 	double dx_t = xpos - prev_x;
 	double dy_t = ypos - prev_y;
 	double dx_r = xpos - prev_x;
 	double dy_r = ypos - prev_y;
 
-	if (view_index == 0 && object_index == 0)
-	{
-		if (sky_type == 0) { dx_t = -dx_t; dy_t = -dy_t; dx_r = -dx_r; dy_r = -dy_r; }
-		else { dx_r = -dx_r; dy_r = -dy_r; }
+	if(view_index == 0 && object_index == 0){
+		if(sky_type == 0){
+			dx_t = -dx_t; dy_t = -dy_t; dx_r = -dx_r; dy_r = -dy_r;
+		}
+		else{
+			dx_r = -dx_r; dy_r = -dy_r;
+		}
 	}
 
-	if (MOUSE_LEFT_PRESS)
-	{
-		if (prev_x - 1e-16< 1e-8 && prev_y - 1e-16 < 1e-8) {
-			prev_x = (float)xpos; prev_y = (float)ypos;
+	if(MOUSE_LEFT_PRESS){
+		if(prev_x - 1e-16 < 1e-8 && prev_y - 1e-16 < 1e-8){
+			prev_x = (float) xpos; prev_y = (float) ypos;
 			return;
 		}
 
-		if (use_arcball())
-		{
+		if(use_arcball()){
 			// 1. Get eye coordinate of arcball and compute its screen coordinate
 			glm::vec4 arcball_eyecoord = glm::inverse(eyeRBT) * arcballRBT * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			glm::vec3 arcball_eyecoord3 = glm::vec3(arcball_eyecoord);
 			glm::vec2 arcballCenter = eye_to_screen(arcball_eyecoord3,
-				Projection,
-				frameBufferWidth,
-				frameBufferHeight
-				);
+													Projection,
+													frameBufferWidth,
+													frameBufferHeight
+			);
 
-			// compute z index
+		// compute z index
 			glm::vec2 p1 = glm::vec2(prev_x, prev_y) - arcballCenter;
 			glm::vec2 p2 = glm::vec2(xpos, ypos) - arcballCenter;
 
@@ -246,17 +248,21 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 			glm::quat w1, w2;
 			// 2. Compute arcball rotation (Chatper 8)
-			if (object_index == 0 && view_index == 0 && sky_type == 0) { w1 = glm::quat(0.0f, -v1); w2 = glm::quat(0.0f, v2); }
-			else { w1 = glm::quat(0.0f, v2); w2 = glm::quat(0.0f, -v1); }
+			if(object_index == 0 && view_index == 0 && sky_type == 0){
+				w1 = glm::quat(0.0f, -v1); w2 = glm::quat(0.0f, v2);
+			}
+			else{
+				w1 = glm::quat(0.0f, v2); w2 = glm::quat(0.0f, -v1);
+			}
 
-			// Arcball: axis k and 2*theta (Chatper 8)
+// Arcball: axis k and 2*theta (Chatper 8)
 			glm::quat w = w1 * w2;
 			m = glm::toMat4(w);
 		}
 		else // ego motion
 		{
-			glm::quat xRotation = glm::angleAxis((float)-dy_r * 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
-			glm::quat yRotation = glm::angleAxis((float)dx_r * 0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::quat xRotation = glm::angleAxis((float) -dy_r * 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::quat yRotation = glm::angleAxis((float) dx_r * 0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 			glm::quat w = yRotation * xRotation;
 			m = glm::toMat4(w);
@@ -264,80 +270,75 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 
 		// Apply transformation with auxiliary frame
 		setWrtFrame();
-		if (object_index == 0) { skyRBT = aFrame * m * glm::inverse(aFrame) * skyRBT; }
-		else { objectRBT[0] = aFrame * m * glm::inverse(aFrame) * objectRBT[0]; }
+		if(object_index == 0){
+			skyRBT = aFrame * m * glm::inverse(aFrame) * skyRBT;
+		}
+		else{
+			objectRBT[0] = aFrame * m * glm::inverse(aFrame) * objectRBT[0];
+		}
 
-		prev_x = (float)xpos; prev_y = (float)ypos;
+		prev_x = (float) xpos; prev_y = (float) ypos;
 	}
 }
 
-
-void toggleEyeMode()
-{
+void toggleEyeMode(){
 	view_index = (view_index + 1) % 2;
-	if (view_index == 0) {
+	if(view_index == 0){
 		std::cout << "Using sky view" << std::endl;
 	}
-	else {
+	else{
 		std::cout << "Using object " << view_index << " view" << std::endl;
 	}
 }
 
-void cycleManipulation()
-{
+void cycleManipulation(){
 	object_index = (object_index + 1) % 2;
-	if (object_index == 0) {
+	if(object_index == 0){
 		std::cout << "Manipulating sky frame" << std::endl;
 	}
-	else {
+	else{
 		std::cout << "Manipulating object " << object_index << std::endl;
 	}
 }
 
-void cycleSkyAMatrix()
-{
-	if (object_index == 0 && view_index == 0) {
+void cycleSkyAMatrix(){
+	if(object_index == 0 && view_index == 0){
 		sky_type = (sky_type + 1) % 2;
-		if (sky_type == 0) {
+		if(sky_type == 0){
 			std::cout << "world-sky" << std::endl;
 		}
-		else {
+		else{
 			std::cout << "sky-sky" << std::endl;
 		}
 	}
-	else {
+	else{
 		std::cout << "Unable to change sky mode" << std::endl;
 	}
 }
 
-static void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+static void keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
 	glm::mat4 m;
-	if (action == GLFW_PRESS)
-	{
-		switch (key)
-		{		
-		case GLFW_KEY_4:
-			if (animate) animate = false;
-			else animate = true;
-			break;		
-		case GLFW_KEY_P://Change Programs
-			program_cnt++;
-			if (program_cnt > 2)
-				program_cnt = 0;
-			set_program(program_cnt);
-			break;
-		default:
-			break;
+	if(action == GLFW_PRESS){
+		switch(key){
+			case GLFW_KEY_4:
+				if(animate) animate = false;
+				else animate = true;
+				break;
+			case GLFW_KEY_P://Change Programs
+				program_cnt++;
+				if(program_cnt > 2)
+					program_cnt = 0;
+				set_program(program_cnt);
+				break;
+			default:
+				break;
 		}
 	}
 }
 
-int main(void)
-{
+int main(void){
 	// Initialise GLFW
-	if (!glfwInit())
-	{
+	if(!glfwInit()){
 		return -1;
 	}
 
@@ -348,8 +349,8 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow((int)windowWidth, (int)windowHeight, "Lab4", NULL, NULL);
-	if (window == NULL) {
+	window = glfwCreateWindow((int) windowWidth, (int) windowHeight, "Lab4", NULL, NULL);
+	if(window == NULL){
 		glfwTerminate();
 		return -1;
 	}
@@ -357,7 +358,7 @@ int main(void)
 
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
+	if(glewInit() != GLEW_OK){
 		return -1;
 	}
 
@@ -370,14 +371,13 @@ int main(void)
 
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 
-	// Clear with sky color	
+	// Clear with sky color
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
-
 
 	Projection = glm::perspective(fov, windowWidth / windowHeight, 0.1f, 100.0f);
 	skyRBT = glm::translate(glm::mat4(1.0f), eyePosition);
@@ -400,8 +400,8 @@ int main(void)
 	cubes[0].set_projection(&Projection);
 	cubes[0].set_eye(&eyeRBT);
 	cubes[0].set_model(&objectRBT[0]);
-		
-	cubes[1] = Model();	
+
+	cubes[1] = Model();
 	cubes[1].initialize(DRAW_TYPE::ARRAY, cubes[0]);
 
 	cubes[1].set_projection(&Projection);
@@ -415,7 +415,7 @@ int main(void)
 	skybox.set_projection(&Projection);
 	skybox.set_eye(&eyeRBT);
 	skybox.set_model(&skyboxRBT);
-	
+
 	////////////////////////////////////
 	arcBall = Model();
 	init_sphere(arcBall);
@@ -429,19 +429,19 @@ int main(void)
 	init_texture();
 
 	mat4 oO[9];
-	for (int i = 0; i<9; i++) oO[i] = objectRBT[i];
+	for(int i = 0; i < 9; i++) oO[i] = objectRBT[i];
 	float angle = 0.0f;
 	double pre_time = glfwGetTime();
-	
+
 	program_cnt = 0;
 	set_program(0);
-	do {
+	do{
 		double cur_time = glfwGetTime();
 		// Clear the screen
-		if (cur_time - pre_time > 0.008){
+		if(cur_time - pre_time > 0.008){
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			eyeRBT = (view_index == 0) ? skyRBT : objectRBT[0];
-			
+
 			glm::vec3 lightVec = glm::vec3(sin(angle), 0.0f, cos(angle));
 			glm::vec4 pLightPos = inverse(eyeRBT) * vec4(0.0f, 2.0f * cos(angle), 2.0f * sin(angle), 1.0f);
 			glm::vec4 sDest = vec4(2.0f * cos(angle), -2.0f, 2.0f * sin(angle), 1.0f);
@@ -449,63 +449,82 @@ int main(void)
 			glm::vec4 sLightPos = inverse(eyeRBT)  * vec4(0.0f, 4.0f, 0.0f, 1.0f);
 			glm::vec4 sLightDir = inverse(eyeRBT) * (sDest - sLightPoss);
 
-			if (animate)
+			if(animate)
 				angle += 0.02f;
-			if (angle > 360.0f) angle -= 360.0f;
-			
-			if (program_cnt == 2){
-				isSky = glGetUniformLocation(addPrograms[2], "DrawSkyBox");
-				glUniform1i(isSky, 0);		
-				//TODO: pass the cubemap texture to shader
+			if(angle > 360.0f) angle -= 360.0f;
 
+			if(program_cnt == 2){
+				isSky = glGetUniformLocation(addPrograms[2], "DrawSkyBox");
+				glUniform1i(isSky, 0);
+				//TODO: pass the cubemap texture to shader
+				glActiveTexture(GL_TEXTURE0 + 3);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexID);
+				glUniform1i(cubeTex, 3);
 			}
-			//TODO: pass the first texture value to shader			
-			
+			//TODO: pass the first texture value to shader
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture[0]);
+			glUniform1i(textureID[program_cnt][0], 0);
+
 			//draw first cube models
 			glUseProgram(cubes[0].GLSLProgramID);
 			lightLocCube = glGetUniformLocation(cubes[0].GLSLProgramID, "uLight");
-			glUniform3f(lightLocCube, lightVec.x, lightVec.y, lightVec.z);			
+			glUniform3f(lightLocCube, lightVec.x, lightVec.y, lightVec.z);
 			cubes[0].draw();
-			
+
 			//TODO: pass bump(normalmap) texture value to shader
-			
-			//TODO: pass second texture value to shader						
-			
+			if(program_cnt == 1){
+				glActiveTexture(GL_TEXTURE0 + 2);
+				glBindTexture(GL_TEXTURE_2D, bumpTex);
+				glUniform1i(bumpTexID, 2);
+			}
+
+			//TODO: pass second texture value to shader
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, texture[1]);
+			glUniform1i(textureID[program_cnt][1], 1);
+
 			//draw second cube models
 			glUseProgram(cubes[1].GLSLProgramID);
 			lightLocCube = glGetUniformLocation(cubes[1].GLSLProgramID, "uLight");
 			glUniform3f(lightLocCube, lightVec.x, lightVec.y, lightVec.z);
 			cubes[1].draw2(cubes[0]);
 
-			if (program_cnt == 2){				
+			if(program_cnt == 2){
 				isSky = glGetUniformLocation(addPrograms[2], "DrawSkyBox");
 				glUniform1i(isSky, 1);
 
 				//TODO: Pass the texture(cubemap value to shader) and eye position
-				
+				glUseProgram(addPrograms[2]);
+				isEye = glGetUniformLocation(addPrograms[2], "WorldCameraPosition");
+				glUniform3f(isEye, eyePosition.x, eyePosition.y, eyePosition.z);
+				cubeTex = glGetUniformLocation(addPrograms[2], "cubemap");
+				glActiveTexture(GL_TEXTURE0 + 3);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexID);
+				glUniform1i(cubeTex, 3);
+
 				glDepthMask(GL_FALSE);
 				skybox.draw();
 				glDepthMask(GL_TRUE);
 			}
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			switch (object_index)
-			{
-			case 0:
-				arcballRBT = (sky_type == 0) ? worldRBT : skyRBT;
-				break;
-			case 1:
-				arcballRBT = objectRBT[0];
-				break;
-			default:
-				break;
+			switch(object_index){
+				case 0:
+					arcballRBT = (sky_type == 0) ? worldRBT : skyRBT;
+					break;
+				case 1:
+					arcballRBT = objectRBT[0];
+					break;
+				default:
+					break;
 			}
 
 			ScreenToEyeScale = compute_screen_eye_scale(
 				(glm::inverse(eyeRBT) * arcballRBT * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)).z,
 				fovy,
 				frameBufferHeight
-				);
+			);
 			arcBallScale = ScreenToEyeScale * arcBallScreenRadius;
 			arcballRBT = arcballRBT * glm::scale(worldRBT, glm::vec3(arcBallScale, arcBallScale, arcBallScale));
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -515,11 +534,11 @@ int main(void)
 			pre_time = cur_time;
 		}
 	} // Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-	glfwWindowShouldClose(window) == 0);
+	while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+		  glfwWindowShouldClose(window) == 0);
 
-	// Clean up data structures and glsl objects	
-	for (int i = 0; i<2; i++) cubes[i].cleanup();
+		  // Clean up data structures and glsl objects
+	for(int i = 0; i < 2; i++) cubes[i].cleanup();
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
