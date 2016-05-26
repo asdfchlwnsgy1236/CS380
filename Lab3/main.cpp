@@ -286,10 +286,10 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 }
 
 void setPostVec3s(){
-	postdlDirection = normalize(inverse(mat3(eyeRBT)) * dlDirection);
-	postplLocation = plLocation;//vec3(inverse(eyeRBT) * vec4(plLocation, 1.0f));
-	postsLocation = vec3(inverse(eyeRBT) * vec4(sLocation, 1.0f));
-	postsDirection = normalize(inverse(mat3(eyeRBT)) * sDirection);
+	postdlDirection = dlDirection; //normalize(inverse(mat3(eyeRBT)) * dlDirection);
+	postplLocation = plLocation; //vec3(inverse(eyeRBT) * vec4(plLocation, 1.0f));
+	postsLocation = sLocation; //vec3(inverse(eyeRBT) * vec4(sLocation, 1.0f));
+	postsDirection = sDirection; //normalize(inverse(mat3(eyeRBT)) * sDirection);
 }
 
 void setLightUniforms(float dli, float pli, float plar, float si, float sar, float sca,

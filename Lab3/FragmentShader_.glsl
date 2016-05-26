@@ -29,7 +29,7 @@ vec3 applyDL(){
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[0] * lightFloats[0], specular = vec3(0.0);
 	if(length(diffuse) > 0.0){
 		specularCo = pow(max(0.0, dot(hv, normalAlt)), 64.0);
-		vec3 specular = specularCo * shininess * lightVec3s[0] * lightFloats[0];
+		specular = specularCo * shininess * lightVec3s[0] * lightFloats[0];
 	}
 	
 	return ambient + diffuse + specular;
