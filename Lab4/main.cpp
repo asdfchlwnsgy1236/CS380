@@ -394,15 +394,15 @@ int main(void){
 	//Initialize cube models
 	init_cubeRBT();
 	cubes[0] = Model();
-	init_texture_cube(cubes[0]);
-	cubes[0].initialize(DRAW_TYPE::ARRAY, addPrograms[0]);
+	//init_texture_cube(cubes[0]);
+	//cubes[0].initialize(DRAW_TYPE::ARRAY, addPrograms[0]);
 
 	cubes[0].set_projection(&Projection);
 	cubes[0].set_eye(&eyeRBT);
 	cubes[0].set_model(&objectRBT[0]);
 
 	cubes[1] = Model();
-	cubes[1].initialize(DRAW_TYPE::ARRAY, cubes[0]);
+	//cubes[1].initialize(DRAW_TYPE::ARRAY, cubes[0]);
 
 	cubes[1].set_projection(&Projection);
 	cubes[1].set_eye(&eyeRBT);
@@ -410,8 +410,8 @@ int main(void){
 
 	//Initilize skyBox
 	skybox = Model();
-	init_skybox(skybox);
-	skybox.initialize(DRAW_TYPE::ARRAY, addPrograms[2]);
+	//init_skybox(skybox);
+	//skybox.initialize(DRAW_TYPE::ARRAY, addPrograms[2]);
 	skybox.set_projection(&Projection);
 	skybox.set_eye(&eyeRBT);
 	skybox.set_model(&skyboxRBT);
@@ -419,7 +419,7 @@ int main(void){
 	////////////////////////////////////
 	arcBall = Model();
 	init_sphere(arcBall);
-	arcBall.initialize(DRAW_TYPE::INDEX, cubes[0].GLSLProgramID);
+	//arcBall.initialize(DRAW_TYPE::INDEX, cubes[0].GLSLProgramID);
 
 	arcBall.set_projection(&Projection);
 	arcBall.set_eye(&eyeRBT);
@@ -488,7 +488,7 @@ int main(void){
 			glUseProgram(cubes[1].GLSLProgramID);
 			lightLocCube = glGetUniformLocation(cubes[1].GLSLProgramID, "uLight");
 			glUniform3f(lightLocCube, lightVec.x, lightVec.y, lightVec.z);
-			cubes[1].draw2(cubes[0]);
+			//cubes[1].draw2(cubes[0]);
 
 			if(program_cnt == 2){
 				isSky = glGetUniformLocation(addPrograms[2], "DrawSkyBox");

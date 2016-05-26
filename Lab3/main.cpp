@@ -29,6 +29,11 @@ float dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRati
 vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection,
 postdlDirection, postplLocation, postsLocation, postsDirection;
 
+const float startFloats[3] = {1.0f, 1.0f, 1.0f};
+const vec3 startVec3s[4] = {vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 2.0f, 0.0f), vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)};
+
+float dlStartTime, plStartTime, sStartTime, dlRotation;
+
 // View properties
 glm::mat4 Projection;
 float windowWidth = 1024.0f;
@@ -250,19 +255,29 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 			case GLFW_KEY_H:
 				std::cout << "CS380 Homework Assignment 2" << std::endl;
 				std::cout << "keymaps:" << std::endl;
-				std::cout << "h\t\t Help command" << std::endl;
-				std::cout << "v\t\t Change eye matrix" << std::endl;
-				std::cout << "o\t\t Change current manipulating object" << std::endl;
-				std::cout << "m\t\t Change auxiliary frame between world-sky and sky-sky" << std::endl;
+				std::cout << "h\t Help command" << std::endl;
+				std::cout << "1\t Toggle directional light on/off state" << std::endl;
+				std::cout << "2\t Toggle point light on/off state" << std::endl;
+				std::cout << "3\t Toggle spotlight on/off state" << std::endl;
+				std::cout << "4\t Toggle all lights on/off state" << std::endl;
 				break;
-			case GLFW_KEY_V:
-
+			case GLFW_KEY_1:
+				dlIntensity = dlIntensity > 0.0f ? 0.0f : dlStartTime = glfwGetTime(), dlDirection = startVec3s[0], startFloats[0];
 				break;
-			case GLFW_KEY_O:
-
+			case GLFW_KEY_2:
+				plIntensity = plIntensity > 0.0f ? 0.0f : plStartTime = glfwGetTime(), plLocation = startVec3s[1], startFloats[1];
 				break;
-			case GLFW_KEY_M:
-
+			case GLFW_KEY_3:
+				sIntensity = sIntensity > 0.0f ? 0.0f : sStartTime = glfwGetTime(), sLocation = startVec3s[2], sDirection = startVec3s[3], startFloats[2];
+				break;
+			case GLFW_KEY_4:
+				if(dlIntensity > 0.0f && plIntensity > 0.0f && sIntensity > 0.0f){
+					dlIntensity = plIntensity = sIntensity = 0.0f;
+				}
+				else{
+					dlIntensity = startFloats[0], plIntensity = startFloats[1], sIntensity = startFloats[2],
+						dlStartTime = plStartTime = sStartTime = glfwGetTime();
+				}
 				break;
 			default:
 				break;
@@ -371,17 +386,39 @@ int main(void){
 	arcBall.set_model(&arcballRBT);
 
 	//TODO Setting Light Vectors
-	//dlIntensity = 1.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
-	//plIntensity = 1.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 1.0f, 0.0f);
-	sIntensity = 1.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(6.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
+	dlIntensity = 0.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
+	plIntensity = 0.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 2.0f, 0.0f);
+	sIntensity = 0.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(6.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
 
+	float currtime = glfwGetTime(), prevtime = currtime, elapsedtime = currtime - prevtime;
 	do{
+		currtime = glfwGetTime(), elapsedtime = currtime - prevtime, prevtime = currtime;
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		eyeRBT = (view_index == 0) ? skyRBT : objectRBT[1];
 
 		//TODO: pass the light value to the shader
+		if(dlIntensity > 0.0f){
+			float dltime = currtime - dlStartTime, tmpa = degrees(acosf(dot(startVec3s[0], dlDirection)));
+			if(tmpa <= -60.0f){
+				dlRotation = 30.0f;
+			}
+			else if(tmpa >= 60.0f){
+				dlRotation = -30.0f;
+			}
+			dlDirection = rotateZ(dlDirection, dlRotation * dltime);
+		}
+		if(plIntensity > 0.0f){
+			float pltime = (currtime - plStartTime) * 60.0f;
+			plLocation = vec3(plLocation.x, 2.0f * sinf(pltime), 2.0f * cosf(pltime));
+		}
+		if(sIntensity > 0.0f){
+			float stime = (currtime - sStartTime) * 60.0f;
+			sDirection = vec3(sqrtf(2) * cosf(stime) / (powf(sinf(stime), 2.0f) + 1.0f), -sLocation.y, sqrtf(2) * cosf(stime) * sinf(stime) / (powf(sinf(stime), 2.0f) + 1.0f));
+		}
+
 		if(length2(dlDirection) > 0.0f){
 			dlDirection = normalize(dlDirection);
 		}
