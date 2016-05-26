@@ -275,7 +275,9 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 					dlIntensity = plIntensity = sIntensity = 0.0f;
 				}
 				else{
-					dlIntensity = startFloats[0], plIntensity = startFloats[1], sIntensity = startFloats[2],
+					dlIntensity = startFloats[0], dlDirection = startVec3s[0],
+						plIntensity = startFloats[1], plLocation = startVec3s[1],
+						sIntensity = startFloats[2], sLocation = startVec3s[2], sDirection = startVec3s[3],
 						plStartTime = sStartTime = glfwGetTime();
 				}
 				break;
