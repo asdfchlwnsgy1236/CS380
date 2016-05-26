@@ -32,7 +32,7 @@ postdlDirection, postplLocation, postsLocation, postsDirection;
 const float startFloats[3] = {1.0f, 1.0f, 1.0f};
 const vec3 startVec3s[4] = {vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 2.0f, 0.0f), vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)};
 
-float dlStartTime, plStartTime, sStartTime, dlRotation;
+float plStartTime, sStartTime, dlRotation = 60.0f;
 
 // View properties
 glm::mat4 Projection;
@@ -262,13 +262,13 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				std::cout << "4\t Toggle all lights on/off state" << std::endl;
 				break;
 			case GLFW_KEY_1:
-				dlIntensity = dlIntensity > 0.0f ? 0.0f : dlStartTime = glfwGetTime(), dlDirection = startVec3s[0], startFloats[0];
+				dlIntensity = dlIntensity > 0.0f ? 0.0f : (dlDirection = startVec3s[0], startFloats[0]);
 				break;
 			case GLFW_KEY_2:
-				plIntensity = plIntensity > 0.0f ? 0.0f : plStartTime = glfwGetTime(), plLocation = startVec3s[1], startFloats[1];
+				plIntensity = plIntensity > 0.0f ? 0.0f : (plStartTime = glfwGetTime(), plLocation = startVec3s[1], startFloats[1]);
 				break;
 			case GLFW_KEY_3:
-				sIntensity = sIntensity > 0.0f ? 0.0f : sStartTime = glfwGetTime(), sLocation = startVec3s[2], sDirection = startVec3s[3], startFloats[2];
+				sIntensity = sIntensity > 0.0f ? 0.0f : (sStartTime = glfwGetTime(), sLocation = startVec3s[2], sDirection = startVec3s[3], startFloats[2]);
 				break;
 			case GLFW_KEY_4:
 				if(dlIntensity > 0.0f && plIntensity > 0.0f && sIntensity > 0.0f){
@@ -276,7 +276,7 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				}
 				else{
 					dlIntensity = startFloats[0], plIntensity = startFloats[1], sIntensity = startFloats[2],
-						dlStartTime = plStartTime = sStartTime = glfwGetTime();
+						plStartTime = sStartTime = glfwGetTime();
 				}
 				break;
 			default:
@@ -286,10 +286,10 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 }
 
 void setPostVec3s(){
-	postdlDirection = normalize(vec3(inverse(eyeRBT) * vec4(dlDirection, 0.0f)));
-	postplLocation = vec3(inverse(eyeRBT) * vec4(plLocation, 1.0f));
+	postdlDirection = normalize(inverse(mat3(eyeRBT)) * dlDirection);
+	postplLocation = plLocation;//vec3(inverse(eyeRBT) * vec4(plLocation, 1.0f));
 	postsLocation = vec3(inverse(eyeRBT) * vec4(sLocation, 1.0f));
-	postsDirection = normalize(vec3(inverse(eyeRBT) * vec4(sDirection, 0.0f)));
+	postsDirection = normalize(inverse(mat3(eyeRBT)) * sDirection);
 }
 
 void setLightUniforms(float dli, float pli, float plar, float si, float sar, float sca,
@@ -388,7 +388,7 @@ int main(void){
 	//TODO Setting Light Vectors
 	dlIntensity = 0.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
 	plIntensity = 0.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 2.0f, 0.0f);
-	sIntensity = 0.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(6.0f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
+	sIntensity = 0.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(3.5f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
 
 	float currtime = glfwGetTime(), prevtime = currtime, elapsedtime = currtime - prevtime;
 	do{
@@ -401,21 +401,19 @@ int main(void){
 
 		//TODO: pass the light value to the shader
 		if(dlIntensity > 0.0f){
-			float dltime = currtime - dlStartTime, tmpa = degrees(acosf(dot(startVec3s[0], dlDirection)));
-			if(tmpa <= -60.0f){
-				dlRotation = 30.0f;
+			float tmpa = degrees(acosf(dot(startVec3s[0], dlDirection)));
+			if(tmpa >= 60.0f){
+				dlRotation *= -1.0f;
+				dlDirection = rotateZ(dlDirection, dlRotation * elapsedtime / 2.0f);
 			}
-			else if(tmpa >= 60.0f){
-				dlRotation = -30.0f;
-			}
-			dlDirection = rotateZ(dlDirection, dlRotation * dltime);
+			dlDirection = rotateZ(dlDirection, dlRotation * elapsedtime);
 		}
 		if(plIntensity > 0.0f){
-			float pltime = (currtime - plStartTime) * 60.0f;
+			float pltime = (currtime - plStartTime) * 2.0f;
 			plLocation = vec3(plLocation.x, 2.0f * sinf(pltime), 2.0f * cosf(pltime));
 		}
 		if(sIntensity > 0.0f){
-			float stime = (currtime - sStartTime) * 60.0f;
+			float stime = (currtime - sStartTime) * 2.0f;
 			sDirection = vec3(sqrtf(2) * cosf(stime) / (powf(sinf(stime), 2.0f) + 1.0f), -sLocation.y, sqrtf(2) * cosf(stime) * sinf(stime) / (powf(sinf(stime), 2.0f) + 1.0f));
 		}
 

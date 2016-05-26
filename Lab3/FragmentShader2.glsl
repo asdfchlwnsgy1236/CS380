@@ -20,7 +20,7 @@ vec3 applyDL(){
 		return vec3(0.0);
 	}
 	
-	vec3 tolight = normalize(-lightVec3s[1] - worldFP), 
+	vec3 tolight = normalize(-lightVec3s[1]), 
 	toV = -normalize(fragmentPosition), 
 	hv = normalize(toV + tolight), 
 	normal = normalize(fragmentNormal), 
