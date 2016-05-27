@@ -25,14 +25,20 @@ using namespace glm;
 float g_groundSize = 100.0f;
 float g_groundY = -2.5f;
 
+// light property variables
 float dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle; // sConeAngle needs to be in radians
-vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection,
-postdlDirection, postplLocation, postsLocation, postsDirection;
+vec3 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection;
 
-const float startFloats[3] = {1.0f, 1.0f, 1.0f};
-const vec3 startVec3s[4] = {vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 2.0f, 0.0f), vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)};
+// light property constants
+const float startIntensities[3] = {1.0f, 1.0f, 1.0f},
+startMisc[3] = {0.25f, 0.01f, radians(3.5f)};
+const vec3 startColors[3] = {vec3(1.0f), vec3(1.0f), vec3(1.0f)},
+startLocsDirs[4] = {vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 2.0f, 0.0f), vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)};
 
-float plStartTime, sStartTime, dlRotation = 60.0f;
+// light animation variables
+float plStartTime, plPauseTime, sStartTime, sPauseTime, dlRotation = 60.0f;
+bool dlRainbow = false, plRainbow = false, sRainbow = false, playing = true;
+int dlRainbowPhase = 0, plRainbowPhase = 0, sRainbowPhase = 0;
 
 // View properties
 glm::mat4 Projection;
@@ -256,29 +262,68 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				std::cout << "CS380 Homework Assignment 2" << std::endl;
 				std::cout << "keymaps:" << std::endl;
 				std::cout << "h\t Help command" << std::endl;
+				std::cout << "p\t Pause/resume all light animations (camera can still move)" << std::endl;
 				std::cout << "1\t Toggle directional light on/off state" << std::endl;
 				std::cout << "2\t Toggle point light on/off state" << std::endl;
 				std::cout << "3\t Toggle spotlight on/off state" << std::endl;
 				std::cout << "4\t Toggle all lights on/off state" << std::endl;
+				std::cout << "5\t Toggle directional light normal/rainbow mode" << std::endl;
+				std::cout << "6\t Toggle point light normal/rainbow mode" << std::endl;
+				std::cout << "7\t Toggle spotlight normal/rainbow mode" << std::endl;
+				std::cout << "8\t Toggle all lights normal/rainbow mode" << std::endl;
+				std::cout << "9\t Toggle all lights on/off state and normal/rainbow mode" << std::endl;
+				break;
+			case GLFW_KEY_P:
+				playing = playing ? (plPauseTime = sPauseTime = glfwGetTime(), false) : (plStartTime += glfwGetTime() - plPauseTime, sStartTime += glfwGetTime() - sPauseTime, true);
 				break;
 			case GLFW_KEY_1:
-				dlIntensity = dlIntensity > 0.0f ? 0.0f : (dlDirection = startVec3s[0], startFloats[0]);
+				dlIntensity = dlIntensity > 0.0f ? (dlDirection = startLocsDirs[0], 0.0f) : startIntensities[0];
 				break;
 			case GLFW_KEY_2:
-				plIntensity = plIntensity > 0.0f ? 0.0f : (plStartTime = glfwGetTime(), plLocation = startVec3s[1], startFloats[1]);
+				plIntensity = plIntensity > 0.0f ? (plLocation = startLocsDirs[1], 0.0f) : (plStartTime = glfwGetTime(), startIntensities[1]);
 				break;
 			case GLFW_KEY_3:
-				sIntensity = sIntensity > 0.0f ? 0.0f : (sStartTime = glfwGetTime(), sLocation = startVec3s[2], sDirection = startVec3s[3], startFloats[2]);
+				sIntensity = sIntensity > 0.0f ? (sLocation = startLocsDirs[2], sDirection = startLocsDirs[3], 0.0f) : (sStartTime = glfwGetTime(), startIntensities[2]);
 				break;
 			case GLFW_KEY_4:
 				if(dlIntensity > 0.0f && plIntensity > 0.0f && sIntensity > 0.0f){
-					dlIntensity = plIntensity = sIntensity = 0.0f;
+					dlIntensity = plIntensity = sIntensity = 0.0f,
+						dlDirection = startLocsDirs[0], plLocation = startLocsDirs[1], sLocation = startLocsDirs[2], sDirection = startLocsDirs[3];
 				}
 				else{
-					dlIntensity = startFloats[0], dlDirection = startVec3s[0],
-						plIntensity = startFloats[1], plLocation = startVec3s[1],
-						sIntensity = startFloats[2], sLocation = startVec3s[2], sDirection = startVec3s[3],
+					dlIntensity = startIntensities[0], plIntensity = startIntensities[1], sIntensity = startIntensities[2],
 						plStartTime = sStartTime = glfwGetTime();
+				}
+				break;
+			case GLFW_KEY_5:
+				dlRainbow = dlRainbow ? (dlColor = startColors[0], false) : true;
+				break;
+			case GLFW_KEY_6:
+				plRainbow = plRainbow ? (plColor = startColors[1], false) : true;
+				break;
+			case GLFW_KEY_7:
+				sRainbow = sRainbow ? (sColor = startColors[2], false) : true;
+				break;
+			case GLFW_KEY_8:
+				if(dlRainbow && plRainbow && sRainbow){
+					dlRainbow = plRainbow = sRainbow = false,
+						dlColor = startColors[0], plColor = startColors[1], sColor = startColors[2];
+				}
+				else{
+					dlRainbow = plRainbow = sRainbow = true;
+				}
+				break;
+			case GLFW_KEY_9:
+				if(dlIntensity > 0.0f && plIntensity > 0.0f && sIntensity > 0.0f && dlRainbow && plRainbow && sRainbow){
+					dlIntensity = plIntensity = sIntensity = 0.0f,
+						dlDirection = startLocsDirs[0], plLocation = startLocsDirs[1], sLocation = startLocsDirs[2], sDirection = startLocsDirs[3],
+						dlRainbow = plRainbow = sRainbow = false,
+						dlColor = startColors[0], plColor = startColors[1], sColor = startColors[2];
+				}
+				else{
+					dlIntensity = startIntensities[0], plIntensity = startIntensities[1], sIntensity = startIntensities[2],
+						plStartTime = sStartTime = glfwGetTime(),
+						dlRainbow = plRainbow = sRainbow = true;
 				}
 				break;
 			default:
@@ -287,11 +332,32 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 	}
 }
 
-void setPostVec3s(){
-	postdlDirection = dlDirection; //normalize(inverse(mat3(eyeRBT)) * dlDirection);
-	postplLocation = plLocation; //vec3(inverse(eyeRBT) * vec4(plLocation, 1.0f));
-	postsLocation = sLocation; //vec3(inverse(eyeRBT) * vec4(sLocation, 1.0f));
-	postsDirection = sDirection; //normalize(inverse(mat3(eyeRBT)) * sDirection);
+void iterateRainbow(int *rp, vec3 *tc, float dt){
+	switch(*rp){
+		case 0:
+			(*tc).y -= dt, (*tc).z -= dt, *rp += (*tc).y <= 0.0f && (*tc).z <= 0.0f ? ((*tc).y = 0.0f, (*tc).z = 0.0f, 1) : 0;
+			break;
+		case 1:
+			(*tc).x += dt, *rp += (*tc).x >= 1.0f ? ((*tc).x = 1.0f, 1) : 0;
+			break;
+		case 2:
+			(*tc).z -= dt, *rp += (*tc).z <= 0.0f ? ((*tc).z = 0.0f, 1) : 0;
+			break;
+		case 3:
+			(*tc).y += dt, *rp += (*tc).y >= 1.0f ? ((*tc).y = 1.0f, 1) : 0;
+			break;
+		case 4:
+			(*tc).x -= dt, *rp += (*tc).x <= 0.0f ? ((*tc).x = 0.0f, 1) : 0;
+			break;
+		case 5:
+			(*tc).z += dt, *rp += (*tc).z >= 1.0f ? ((*tc).z = 1.0f, 1) : 0;
+			break;
+		case 6:
+			(*tc).y -= dt, *rp += (*tc).y <= 0.0f ? ((*tc).y = 0.0f, -5) : 0;
+			break;
+		default:
+			break;
+	}
 }
 
 void setLightUniforms(float dli, float pli, float plar, float si, float sar, float sca,
@@ -388,59 +454,72 @@ int main(void){
 	arcBall.set_model(&arcballRBT);
 
 	//TODO Setting Light Vectors
-	dlIntensity = 0.0f, dlColor = vec3(1.0f), dlDirection = vec3(0.0f, -1.0f, 0.0f);
-	plIntensity = 0.0f, plAttenuationRatio = 0.25f, plColor = vec3(1.0f), plLocation = vec3(0.0f, 2.0f, 0.0f);
-	sIntensity = 0.0f, sAttenuationRatio = 0.01f, sConeAngle = radians(3.5f), sColor = vec3(1.0f), sLocation = vec3(0.0f, 10.0f, 0.0f), sDirection = vec3(0.0f, -1.0f, 0.0f);
+	dlIntensity = 0.0f, dlColor = startColors[0], dlDirection = startLocsDirs[0];
+	plIntensity = 0.0f, plAttenuationRatio = startMisc[0], plColor = startColors[1], plLocation = startLocsDirs[1];
+	sIntensity = 0.0f, sAttenuationRatio = startMisc[1], sConeAngle = startMisc[2], sColor = startColors[2], sLocation = startLocsDirs[2], sDirection = startLocsDirs[3];
 
-	float currtime = glfwGetTime(), prevtime = currtime, elapsedtime = currtime - prevtime;
+	float currtime = glfwGetTime(), prevtime = currtime, deltatime = currtime - prevtime;
 	do{
-		currtime = glfwGetTime(), elapsedtime = currtime - prevtime, prevtime = currtime;
+		currtime = glfwGetTime(), deltatime = currtime - prevtime, prevtime = currtime;
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		eyeRBT = (view_index == 0) ? skyRBT : objectRBT[1];
 
-		//TODO: pass the light value to the shader
-		if(dlIntensity > 0.0f){
-			float tmpa = degrees(acosf(dot(startVec3s[0], dlDirection)));
-			if(tmpa >= 60.0f){
-				dlRotation *= -1.0f;
-				dlDirection = rotateZ(dlDirection, dlRotation * elapsedtime / 2.0f);
+		// Mess with the light variables before passing them to the shaders when playing animations
+		if(playing){
+			if(dlIntensity > 0.0f){
+				if(dlRainbow){
+					iterateRainbow(&dlRainbowPhase, &dlColor, deltatime);
+				}
+				float tmpa = degrees(acosf(dot(startLocsDirs[0], dlDirection)));
+				if(tmpa >= 60.0f){
+					dlRotation *= -1.0f;
+					dlDirection = rotateZ(dlDirection, dlRotation * deltatime / 2.0f);
+				}
+				dlDirection = rotateZ(dlDirection, dlRotation * deltatime);
 			}
-			dlDirection = rotateZ(dlDirection, dlRotation * elapsedtime);
-		}
-		if(plIntensity > 0.0f){
-			float pltime = (currtime - plStartTime) * 2.0f;
-			plLocation = vec3(plLocation.x, 2.0f * sinf(pltime), 2.0f * cosf(pltime));
-		}
-		if(sIntensity > 0.0f){
-			float stime = (currtime - sStartTime) * 2.0f;
-			sDirection = vec3(sqrtf(2) * cosf(stime) / (powf(sinf(stime), 2.0f) + 1.0f), -sLocation.y, sqrtf(2) * cosf(stime) * sinf(stime) / (powf(sinf(stime), 2.0f) + 1.0f));
+			if(plIntensity > 0.0f){
+				if(plRainbow){
+					iterateRainbow(&plRainbowPhase, &plColor, deltatime);
+				}
+				float pltime = (currtime - plStartTime) * 2.0f;
+				plLocation = vec3(plLocation.x, 2.0f * sinf(pltime), 2.0f * cosf(pltime));
+			}
+			if(sIntensity > 0.0f){
+				if(sRainbow){
+					iterateRainbow(&sRainbowPhase, &sColor, deltatime);
+				}
+				float stime = (currtime - sStartTime) * 2.0f;
+				sDirection = vec3(sqrtf(2) * cosf(stime) / (powf(sinf(stime), 2.0f) + 1.0f), -sLocation.y, sqrtf(2) * cosf(stime) * sinf(stime) / (powf(sinf(stime), 2.0f) + 1.0f));
+			}
+
+			// Normalize the direction vectors after they have been messed with before passing them to the shaders
+			if(length2(dlDirection) > 0.0f){
+				dlDirection = normalize(dlDirection);
+			}
+			else{
+				dlIntensity = 0.0f;
+			}
+			if(length2(sDirection) > 0.0f){
+				sDirection = normalize(sDirection);
+			}
+			else{
+				sIntensity = 0.0f;
+			}
 		}
 
-		if(length2(dlDirection) > 0.0f){
-			dlDirection = normalize(dlDirection);
-		}
-		else{
-			dlIntensity = 0.0f;
-		}
-		if(length2(sDirection) > 0.0f){
-			sDirection = normalize(sDirection);
-		}
-		else{
-			sIntensity = 0.0f;
-		}
-		setPostVec3s();
+		// TODO: pass the light value to the shader
 		setLightUniforms(dlIntensity, plIntensity, plAttenuationRatio, sIntensity, sAttenuationRatio, sConeAngle,
-						 dlColor, postdlDirection, plColor, postplLocation, sColor, postsLocation, postsDirection);
+						 dlColor, dlDirection, plColor, plLocation, sColor, sLocation, sDirection);
 
 		// TODO: draw OBJ model
 		for(int a = 0; a < 3; a++){
 			object[a].draw();
 		}
 
-		// Draw wireframe of arcBall with dynamic radius
+		// Draw wire frame of arcBall with dynamic radius
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		switch(object_index){
 			case 0:
