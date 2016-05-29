@@ -68,6 +68,7 @@ glm::mat4 m = glm::mat4(1.0f);
 
 // Manipulation index
 int object_index = 0; int view_index = 0; int sky_type = 0;
+int colorSet = 0;
 
 // Arcball manipulation
 Model arcBall;
@@ -120,13 +121,15 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		prev_x = 0.0f; prev_y = 0.0f;
 	}
 
-	//GLfloat tmpf = 2.0f, *tmp0 = &tmpf, *tmp1 = &tmpf, *tmp2 = &tmpf, *tmp3 = &tmpf, *tmp4 = &tmpf;
-	//glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), tmp0);
-	//glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp1);
-	//glGetUniformfv(object[1].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp2);
-	//glGetUniformfv(object[2].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp3);
-	//glGetUniformfv(arcBall.GLSLProgramID, glGetUniformLocation(arcBall.GLSLProgramID, "lightFloats"), tmp4);
-	//std::cout << *tmp0 << " " << *tmp1 << " " << *tmp2 << " " << *tmp3 << " " << *tmp4 << std::endl;
+	if(action == GLFW_PRESS){
+		//GLfloat tmpf = 2.0f, *tmp0 = &tmpf, *tmp1 = &tmpf, *tmp2 = &tmpf, *tmp3 = &tmpf, *tmp4 = &tmpf;
+		//glGetUniformfv(ground.GLSLProgramID, glGetUniformLocation(ground.GLSLProgramID, "lightFloats"), tmp0);
+		//glGetUniformfv(object[0].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp1);
+		//glGetUniformfv(object[1].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp2);
+		//glGetUniformfv(object[2].GLSLProgramID, glGetUniformLocation(object[0].GLSLProgramID, "lightFloats"), tmp3);
+		//glGetUniformfv(arcBall.GLSLProgramID, glGetUniformLocation(arcBall.GLSLProgramID, "lightFloats"), tmp4);
+		//std::cout << *tmp0 << " " << *tmp1 << " " << *tmp2 << " " << *tmp3 << " " << *tmp4 << std::endl;
+	}
 }
 
 void setWrtFrame(){
@@ -263,6 +266,7 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				std::cout << "keymaps:" << std::endl;
 				std::cout << "h\t Help command" << std::endl;
 				std::cout << "p\t Pause/resume all light animations (camera can still move)" << std::endl;
+				std::cout << "c\t Cycle through different color sets for the bunnies." << std::endl;
 				std::cout << "1\t Toggle directional light on/off state" << std::endl;
 				std::cout << "2\t Toggle point light on/off state" << std::endl;
 				std::cout << "3\t Toggle spotlight on/off state" << std::endl;
@@ -274,43 +278,87 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				std::cout << "9\t Toggle all lights on/off state and normal/rainbow mode" << std::endl;
 				break;
 			case GLFW_KEY_P:
-				playing = playing ? (plPauseTime = sPauseTime = glfwGetTime(), false) : (plStartTime += glfwGetTime() - plPauseTime, sStartTime += glfwGetTime() - sPauseTime, true);
+				playing = playing ?
+					(plPauseTime = sPauseTime = glfwGetTime(), std::cout << "Light animation paused." << std::endl, false) :
+					(plStartTime += glfwGetTime() - plPauseTime, sStartTime += glfwGetTime() - sPauseTime, std::cout << "Light animation resumed." << std::endl, true);
+				break;
+			case GLFW_KEY_C:
+				colorSet = ++colorSet % 4;
+				switch(colorSet){
+					case 0:
+						for(int a = 0; a < 3; a++){
+							object[a].recolor(vec3(0.1f, 0.3f, 1.0f)), std::cout << "Recoloring object " << a << " to the original greenish blue color." << std::endl;
+						}
+						break;
+					case 1:
+						object[0].recolor(vec3(1.0f, 0.0f, 0.0f)), std::cout << "Recoloring object 0 to red." << std::endl;
+						object[1].recolor(vec3(0.0f, 0.0f, 1.0f)), std::cout << "Recoloring object 1 to blue." << std::endl;
+						object[2].recolor(vec3(0.0f, 1.0f, 0.0f)), std::cout << "Recoloring object 2 to green." << std::endl;
+						break;
+					case 2:
+						object[0].recolor(vec3(1.0f, 0.0f, 1.0f)), std::cout << "Recoloring object 0 to magenta." << std::endl;
+						object[1].recolor(vec3(0.0f, 1.0f, 1.0f)), std::cout << "Recoloring object 1 to cyan." << std::endl;
+						object[2].recolor(vec3(1.0f, 1.0f, 0.0f)), std::cout << "Recoloring object 2 to yellow." << std::endl;
+						break;
+					case 3:
+						object[0].recolor(vec3(0.5f, 0.5f, 0.5f)), std::cout << "Recoloring object 0 to gray." << std::endl;
+						object[1].recolor(vec3(0.0f, 0.0f, 0.0f)), std::cout << "Recoloring object 1 to complete darkness." << std::endl;
+						object[2].recolor(vec3(1.0f, 1.0f, 1.0f)), std::cout << "Recoloring object 2 to white." << std::endl;
+						break;
+					default:
+						break;
+				}
 				break;
 			case GLFW_KEY_1:
-				dlIntensity = dlIntensity > 0.0f ? (dlDirection = startLocsDirs[0], 0.0f) : startIntensities[0];
+				dlIntensity = dlIntensity > 0.0f ?
+					(dlDirection = startLocsDirs[0], std::cout << "Directional light turned off." << std::endl, 0.0f) :
+					(std::cout << "Directional light turned on." << std::endl, startIntensities[0]);
 				break;
 			case GLFW_KEY_2:
-				plIntensity = plIntensity > 0.0f ? (plLocation = startLocsDirs[1], 0.0f) : (plStartTime = glfwGetTime(), startIntensities[1]);
+				plIntensity = plIntensity > 0.0f ?
+					(plLocation = startLocsDirs[1], std::cout << "Point light turned off." << std::endl, 0.0f) :
+					(plStartTime = glfwGetTime(), std::cout << "Point light turned on." << std::endl, startIntensities[1]);
 				break;
 			case GLFW_KEY_3:
-				sIntensity = sIntensity > 0.0f ? (sLocation = startLocsDirs[2], sDirection = startLocsDirs[3], 0.0f) : (sStartTime = glfwGetTime(), startIntensities[2]);
+				sIntensity = sIntensity > 0.0f ?
+					(sLocation = startLocsDirs[2], sDirection = startLocsDirs[3], std::cout << "Spotlight turned off." << std::endl, 0.0f) :
+					(sStartTime = glfwGetTime(), std::cout << "Spotlight turned on." << std::endl, startIntensities[2]);
 				break;
 			case GLFW_KEY_4:
 				if(dlIntensity > 0.0f && plIntensity > 0.0f && sIntensity > 0.0f){
 					dlIntensity = plIntensity = sIntensity = 0.0f,
-						dlDirection = startLocsDirs[0], plLocation = startLocsDirs[1], sLocation = startLocsDirs[2], sDirection = startLocsDirs[3];
+						dlDirection = startLocsDirs[0], plLocation = startLocsDirs[1], sLocation = startLocsDirs[2], sDirection = startLocsDirs[3],
+						std::cout << "All lights turned off." << std::endl;
 				}
 				else{
 					dlIntensity = startIntensities[0], plIntensity = startIntensities[1], sIntensity = startIntensities[2],
-						plStartTime = sStartTime = glfwGetTime();
+						plStartTime = sStartTime = glfwGetTime(),
+						std::cout << "All lights turned on." << std::endl;
 				}
 				break;
 			case GLFW_KEY_5:
-				dlRainbow = dlRainbow ? (dlColor = startColors[0], false) : true;
+				dlRainbow = dlRainbow ?
+					(dlColor = startColors[0], std::cout << "Directional light mode changed to normal." << std::endl, false) :
+					(std::cout << "Directional light mode changed to rainbow." << std::endl, true);
 				break;
 			case GLFW_KEY_6:
-				plRainbow = plRainbow ? (plColor = startColors[1], false) : true;
+				plRainbow = plRainbow ?
+					(plColor = startColors[1], std::cout << "Point light mode changed to normal." << std::endl, false) :
+					(std::cout << "Point light mode changed to rainbow." << std::endl, true);
 				break;
 			case GLFW_KEY_7:
-				sRainbow = sRainbow ? (sColor = startColors[2], false) : true;
+				sRainbow = sRainbow ?
+					(sColor = startColors[2], std::cout << "Spotlight mode changed to normal." << std::endl, false) :
+					(std::cout << "Spotlight mode changed to rainbow." << std::endl, true);
 				break;
 			case GLFW_KEY_8:
 				if(dlRainbow && plRainbow && sRainbow){
 					dlRainbow = plRainbow = sRainbow = false,
-						dlColor = startColors[0], plColor = startColors[1], sColor = startColors[2];
+						dlColor = startColors[0], plColor = startColors[1], sColor = startColors[2],
+						std::cout << "All lights' modes changed to normal." << std::endl;
 				}
 				else{
-					dlRainbow = plRainbow = sRainbow = true;
+					dlRainbow = plRainbow = sRainbow = true, std::cout << "All lights' modes changed to rainbow." << std::endl;
 				}
 				break;
 			case GLFW_KEY_9:
@@ -318,12 +366,14 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 					dlIntensity = plIntensity = sIntensity = 0.0f,
 						dlDirection = startLocsDirs[0], plLocation = startLocsDirs[1], sLocation = startLocsDirs[2], sDirection = startLocsDirs[3],
 						dlRainbow = plRainbow = sRainbow = false,
-						dlColor = startColors[0], plColor = startColors[1], sColor = startColors[2];
+						dlColor = startColors[0], plColor = startColors[1], sColor = startColors[2],
+						std::cout << "All lights turned off and their modes changed to normal." << std::endl;
 				}
 				else{
 					dlIntensity = startIntensities[0], plIntensity = startIntensities[1], sIntensity = startIntensities[2],
 						plStartTime = sStartTime = glfwGetTime(),
-						dlRainbow = plRainbow = sRainbow = true;
+						dlRainbow = plRainbow = sRainbow = true,
+						std::cout << "All lights turned on and their modes changed to rainbow." << std::endl;
 				}
 				break;
 			default:

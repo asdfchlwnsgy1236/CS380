@@ -25,10 +25,8 @@ vec3 applyDL(){
 	rv = reflect(-tolight, normal);
 	float diffuseCo = max(0.0, dot(normal, tolight)), specularCo = 0.0;
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[0] * lightFloats[0], specular = vec3(0.0);
-	if(length(diffuse) > 0.0){
-		specularCo = pow(max(0.0, dot(rv, toV)), 64.0);
-		specular = specularCo * shininess * lightVec3s[0] * lightFloats[0];
-	}
+	specularCo = pow(max(0.0, dot(rv, toV)), 64.0);
+	specular = specularCo * shininess * lightVec3s[0] * lightFloats[0];
 	
 	return ambient + diffuse + specular;
 }
@@ -44,10 +42,8 @@ vec3 applyPL(){
 	rv = reflect(-tolight, normal);
 	float diffuseCo = max(0.0, dot(normal, tolight)), specularCo = 0.0;
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[2] * lightFloats[1], specular = vec3(0.0);
-	if(length(diffuse) > 0.0){
-		specularCo = pow(max(0.0, dot(rv, toV)), 64.0);
-		specular = specularCo * shininess * lightVec3s[2] * lightFloats[1];
-	}
+	specularCo = pow(max(0.0, dot(rv, toV)), 64.0);
+	specular = specularCo * shininess * lightVec3s[2] * lightFloats[1];
 	float dist = distance(lightVec3s[3], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + lightFloats[2] * pow(dist, 2));
 	
@@ -65,10 +61,8 @@ vec3 applyS(){
 	rv = reflect(-tolight, normal);
 	float diffuseCo = max(0.0, dot(normal, tolight)), specularCo = 0.0;
 	vec3 diffuse = diffuseCo * fragmentColor * lightVec3s[4] * lightFloats[3], specular = vec3(0.0);
-	if(length(diffuse) > 0.0){
-		specularCo = pow(max(0.0, dot(rv, toV)), 64.0);
-		specular = specularCo * shininess * lightVec3s[4] * lightFloats[3];
-	}
+	specularCo = pow(max(0.0, dot(rv, toV)), 64.0);
+	specular = specularCo * shininess * lightVec3s[4] * lightFloats[3];
 	float dist = distance(lightVec3s[5], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + lightFloats[4] * pow(dist, 2)), 
 	ltofa = acos(dot(-tolight, lightVec3s[6]));

@@ -5,12 +5,12 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-enum DRAW_TYPE {
+enum DRAW_TYPE{
 	ARRAY,
 	INDEX
 };
 
-class Model {
+class Model{
 	std::vector<glm::vec3> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> normals;
@@ -19,7 +19,7 @@ class Model {
 	glm::mat4* Projection;
 	glm::mat4* Eye;
 	glm::mat4* ModelTransform;
-	
+
 	DRAW_TYPE type;
 
 	GLuint VertexArrayID;
@@ -27,7 +27,8 @@ class Model {
 	GLuint IndexBufferID;
 	GLuint NormalBufferID;
 	GLuint ColorBufferID;
-public:
+
+	public:
 	GLuint GLSLProgramID;
 	GLuint PickingProgramID;
 	int objectID = -1;
@@ -50,6 +51,9 @@ public:
 	void draw(void);
 	void drawPicking(void);
 	void cleanup(void);
+	// Functions added (begin)
+	void recolor(glm::vec3 newColor);
+	// Functions added (end)
 };
 
 #endif

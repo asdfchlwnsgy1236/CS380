@@ -258,3 +258,19 @@ void Model::cleanup(){
 	glDeleteProgram(this->GLSLProgramID);
 	glDeleteVertexArrays(1, &this->VertexArrayID);
 }
+
+// Functions added (begin)
+void Model::recolor(glm::vec3 newColor){
+	this->colors.clear();
+	for(int a = 0; a < this->vertices.size(); a++){
+		add_color(newColor);
+	}
+
+	glDisableVertexAttribArray(2);
+	glDeleteBuffers(1, &this->ColorBufferID);
+
+	glGenBuffers(1, &this->ColorBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, this->ColorBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * this->colors.size(), &this->colors[0], GL_STATIC_DRAW);
+}
+// Functions added (end)
