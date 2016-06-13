@@ -33,7 +33,7 @@ void main(){
 	
 	float specular = pow(max(0.0, dot(h, normal)), 2.0);
 	float diffuse = max(0.0, dot(normal, tolight));
-	vec3 Kd = vec3(1.0, 1.0, 1.0);
+	vec3 Kd = vec3(1.0, 1.0, 0.0);
 	//TODO: Change material color to texture color	
 	Kd = texture(myTextureSampler, UV).rgb;
 
