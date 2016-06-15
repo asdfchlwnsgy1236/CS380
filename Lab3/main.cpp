@@ -286,24 +286,24 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				colorSet = ++colorSet % 4;
 				switch(colorSet){
 					case 0:
-						for(int a = 0; a < 3; a++){
-							object[a].recolor(vec3(0.1f, 0.3f, 1.0f)), std::cout << "Recoloring object " << a << " to the original greenish blue color." << std::endl;
-						}
+						//for(int a = 0; a < 3; a++){
+						//	object[a].recolor(vec3(0.1f, 0.3f, 1.0f)), std::cout << "Recoloring object " << a << " to the original greenish blue color." << std::endl;
+						//}
 						break;
 					case 1:
-						object[0].recolor(vec3(1.0f, 0.0f, 0.0f)), std::cout << "Recoloring object 0 to red." << std::endl;
-						object[1].recolor(vec3(0.0f, 0.0f, 1.0f)), std::cout << "Recoloring object 1 to blue." << std::endl;
-						object[2].recolor(vec3(0.0f, 1.0f, 0.0f)), std::cout << "Recoloring object 2 to green." << std::endl;
+						//object[0].recolor(vec3(1.0f, 0.0f, 0.0f)), std::cout << "Recoloring object 0 to red." << std::endl;
+						//object[1].recolor(vec3(0.0f, 0.0f, 1.0f)), std::cout << "Recoloring object 1 to blue." << std::endl;
+						//object[2].recolor(vec3(0.0f, 1.0f, 0.0f)), std::cout << "Recoloring object 2 to green." << std::endl;
 						break;
 					case 2:
-						object[0].recolor(vec3(1.0f, 0.0f, 1.0f)), std::cout << "Recoloring object 0 to magenta." << std::endl;
-						object[1].recolor(vec3(0.0f, 1.0f, 1.0f)), std::cout << "Recoloring object 1 to cyan." << std::endl;
-						object[2].recolor(vec3(1.0f, 1.0f, 0.0f)), std::cout << "Recoloring object 2 to yellow." << std::endl;
+						//object[0].recolor(vec3(1.0f, 0.0f, 1.0f)), std::cout << "Recoloring object 0 to magenta." << std::endl;
+						//object[1].recolor(vec3(0.0f, 1.0f, 1.0f)), std::cout << "Recoloring object 1 to cyan." << std::endl;
+						//object[2].recolor(vec3(1.0f, 1.0f, 0.0f)), std::cout << "Recoloring object 2 to yellow." << std::endl;
 						break;
 					case 3:
-						object[0].recolor(vec3(0.5f, 0.5f, 0.5f)), std::cout << "Recoloring object 0 to gray." << std::endl;
-						object[1].recolor(vec3(0.0f, 0.0f, 0.0f)), std::cout << "Recoloring object 1 to complete darkness." << std::endl;
-						object[2].recolor(vec3(1.0f, 1.0f, 1.0f)), std::cout << "Recoloring object 2 to white." << std::endl;
+						//object[0].recolor(vec3(0.5f, 0.5f, 0.5f)), std::cout << "Recoloring object 0 to gray." << std::endl;
+						//object[1].recolor(vec3(0.0f, 0.0f, 0.0f)), std::cout << "Recoloring object 1 to complete darkness." << std::endl;
+						//object[2].recolor(vec3(1.0f, 1.0f, 1.0f)), std::cout << "Recoloring object 2 to white." << std::endl;
 						break;
 					default:
 						break;
