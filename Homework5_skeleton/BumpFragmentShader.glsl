@@ -61,13 +61,14 @@ vec3 applyS(){
 		return vec3(0.0);
 	}
 	
+	vec3 tolight = normalize(lightVec3s[5] - fragmentPosition);
 	float diffuseCo = max(0.0, dot(normal, stolight)), specularCo = 0.0;
 	vec3 diffuse = diffuseCo * textureColor * lightVec3s[4] * lightFloats[3], specular = vec3(0.0);
 	specularCo = pow(max(0.0, dot(srv, stov)), 64.0);
 	specular = specularCo * shininess * lightVec3s[4] * lightFloats[3];
 	float dist = distance(lightVec3s[5], fragmentPosition), 
 	attenuation = 1.0 / (1.0 + lightFloats[4] * pow(dist, 2)), 
-	ltofa = acos(dot(-stolight, lightVec3s[6]));
+	ltofa = acos(dot(-tolight, lightVec3s[6]));
 	if(ltofa > lightFloats[5]){
 		attenuation = 0.0;
 	}
