@@ -36,7 +36,7 @@ void main(){
 	mat4 inverseProjection = inverse(Projection);
 	mat3 inverseModelview = mat3(inverse(MVM));
 	if(DrawSkyBox){
-		ReflectDir = -vertexPosition_modelspace;
+		ReflectDir = vertexPosition_modelspace * vec3(1.0, -1.0, 1.0);
 	}
 	else{
 		vec3 worldPos = vec3(ModelTransform * vec4(vertexPosition_modelspace, 1.0));

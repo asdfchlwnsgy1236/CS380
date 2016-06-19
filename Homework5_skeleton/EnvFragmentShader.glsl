@@ -9,7 +9,6 @@ smooth in vec3 ReflectDir;
 // Ouput data
 out vec3 color;
 
-uniform vec3 uLight;
 uniform bool DrawSkyBox;
 
 uniform samplerCube cubemap;
