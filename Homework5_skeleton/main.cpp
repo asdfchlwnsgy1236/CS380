@@ -54,16 +54,16 @@ glm::mat4 eyeRBT;
 const glm::mat4 worldRBT = glm::mat4(1.0f);
 glm::mat4 arcballRBT = glm::mat4(1.0f);
 glm::mat4 aFrame;
-//cubes
+// cubes
 glm::mat4 objectRBT[9];
 Model cubes[9];
 int program_cnt = 1;
-//cube animation
+// cube animation
 bool rot_first_col = false;
 
-//Sky box
+// Sky box
 Model skybox;
-glm::mat4 skyboxRBT = glm::translate(0.0f, 0.0f, 0.0f);//Will be fixed(cause it is the sky)
+glm::mat4 skyboxRBT = glm::translate(0.0f, 0.0f, 0.0f);// Will be fixed(cause it is the sky)
 
 vec3 eyePosition = vec3(0.0, 0.25, 6.0);
 // Mouse interaction
@@ -99,18 +99,66 @@ void init_cubeRBT(){
 	objectRBT[7] = glm::scale(0.7f, 0.7f, 0.7f)*glm::translate(0.0f, -1.2f, .0f);
 	objectRBT[8] = glm::scale(0.7f, 0.7f, 0.7f)*glm::translate(1.2f, -1.2f, .0f);
 }
+
 void set_program(int p){
 	for(int i = 0; i < 9; i++){
 		cubes[i].GLSLProgramID = addPrograms[p];
 	}
 }
+
 void init_shader(int idx, const char * vertexShader_path, const char * fragmentShader_path){
 	addPrograms[idx] = LoadShaders(vertexShader_path, fragmentShader_path);
 	glUseProgram(addPrograms[idx]);
 }
-void init_texture(void){
-	//TODO: Initialize your textures
+
+void init_cubemap(const char * baseFileName, int size){
+	glActiveTexture(GL_TEXTURE0 + 10);
+	glGenTextures(1, &cubeTex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+	const char * suffixes[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
+	GLuint targets[] = {
+		GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+		GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+		GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+	};
+	GLint w, h;
+	glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, GL_RGBA8, size, size);
+	for(int i = 0; i < 6; i++){
+		std::string texName = std::string(baseFileName) + "_" + suffixes[i] + ".bmp";
+		unsigned char* data = loadBMP_cube(texName.c_str(), &w, &h);
+		glTexSubImage2D(targets[i], 0, 0, 0, w, h,
+						GL_BGR, GL_UNSIGNED_BYTE, data);
+		delete[] data;
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 10);
 }
+
+void init_texture(void){
+	// Initialize cube texture
+	texture[0] = loadBMP_custom("vocaloid_final.bmp");
+	for(int a = 1; a < 9; a++){
+		texture[a] = texture[0];
+	}
+	for(int a = 0; a < 3; a++){
+		textureID[a][0] = glGetUniformLocation(addPrograms[a], "myTextureSampler");
+		for(int b = 1; b < 9; b++){
+			textureID[a][b] = textureID[a][0];
+		}
+	}
+
+	// Initialize bump texture
+	bumpTex = loadBMP_custom("bump_map_final.bmp");
+	bumpTexID = glGetUniformLocation(addPrograms[1], "myBumpSampler");
+
+	// Initialize cubemap texture
+	init_cubemap("yokohama3", 2048);
+}
+
 static bool non_ego_cube_manipulation(){
 	return object_index != 0 && view_index != object_index;
 }
@@ -224,7 +272,7 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
 			// Arcball: axis k and 2*theta (Chatper 8)
 			glm::quat w0 = w1 * w2;
 			// Halve the angle
-			//glm::quat w = glm::angleAxis(glm::angle(w0) / 2.0f, glm::axis(w0));
+			// glm::quat w = glm::angleAxis(glm::angle(w0) / 2.0f, glm::axis(w0));
 			m = glm::toMat4(w0);
 		}
 		else // ego motion
@@ -292,13 +340,13 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 				if(animate) animate = false;
 				else animate = true;
 				break;
-			case GLFW_KEY_P://Change Programs
+			case GLFW_KEY_P:// Change Programs
 				program_cnt++;
 				if(program_cnt > 2)
 					program_cnt = 0;
 				set_program(program_cnt);
 				break;
-			case GLFW_KEY_Q://lotate first column
+			case GLFW_KEY_Q:// lotate first column
 				if(!rot_first_col){
 					rot_first_col = true;
 				}
@@ -359,12 +407,12 @@ int main(void){
 	// initial eye frame = sky frame;
 	eyeRBT = skyRBT;
 
-	//init shader
+	// init shader
 	init_shader(0, "VertexShader.glsl", "FragmentShader.glsl");
 	init_shader(1, "BumpVertexShader.glsl", "BumpFragmentShader.glsl");
 	init_shader(2, "EnvVertexShader.glsl", "EnvFragmentShader.glsl");
 
-	//TODO: Initialize cube model by calling textured cube model
+	// TODO: Initialize cube models by calling textured cube models
 	init_cubeRBT();
 	cubes[0] = Model();
 	init_texture_cube(cubes[0]);
@@ -382,6 +430,7 @@ int main(void){
 		cubes[i].set_model(&objectRBT[i]);
 	}
 
+	// Initialize skybox
 	skybox = Model();
 	init_skybox(skybox);
 	skybox.initialize(DRAW_TYPE::ARRAY, addPrograms[2]);
@@ -389,6 +438,7 @@ int main(void){
 	skybox.set_eye(&eyeRBT);
 	skybox.set_model(&skyboxRBT);
 
+	// Initialize arcball
 	arcBall = Model();
 	init_sphere(arcBall);
 	arcBall.initialize(DRAW_TYPE::INDEX, cubes[0].GLSLProgramID);
@@ -397,7 +447,7 @@ int main(void){
 	arcBall.set_eye(&eyeRBT);
 	arcBall.set_model(&arcballRBT);
 
-	//init textures
+	// init textures
 	init_texture();
 
 	mat4 oO[9];
@@ -407,7 +457,7 @@ int main(void){
 	program_cnt = 0;
 	set_program(0);
 
-	//first column rotation
+	// first column rotation
 	int ani_count = 0;
 	float ani_angle = 0.0f;
 	mat4 curRBT[9];
@@ -420,7 +470,7 @@ int main(void){
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			eyeRBT = (view_index == 0) ? skyRBT : objectRBT[0];
 
-			//cube rotation
+			// cube rotation
 			if(rot_first_col){
 				ani_angle += 0.3f;
 				objectRBT[0] = glm::rotate(glm::mat4(1.0f), ani_angle * 10, glm::vec3(1.0f, 0.0f, 0.0f)) * curRBT[0];
@@ -449,25 +499,49 @@ int main(void){
 				angle += 0.02f;
 			if(angle > 360.0f) angle -= 360.0f;
 
-			//TODO: draw OBJ models
-			//TODO: pass the light value (uniform variables) to shader
-			//TODO: pass the texture value to shader
+			// TODO: draw OBJ models
+			// TODO: pass the light value (uniform variables) to shader
+			// TODO: pass the texture value to shader
+
+			// TODO: pass the first texture value to shader
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture[0]);
+			glUniform1i(textureID[program_cnt][0], 0);
+
+			// Draw the cube models
 			glUseProgram(cubes[0].GLSLProgramID);
 			lightLocCube = glGetUniformLocation(cubes[0].GLSLProgramID, "uLight");
 			glUniform3f(lightLocCube, lightVec.x, lightVec.y, lightVec.z);
 			cubes[0].draw();
 			for(int i = 1; i < 9; i++){
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(GL_TEXTURE_2D, texture[i]);
+				glUniform1i(textureID[program_cnt][i], i);
+
 				glUseProgram(cubes[i].GLSLProgramID);
 				lightLocCube = glGetUniformLocation(cubes[i].GLSLProgramID, "uLight");
 				glUniform3f(lightLocCube, lightVec.x, lightVec.y, lightVec.z);
 				cubes[i].draw2(cubes[0]);
 			}
+
+			// TODO: pass bump(normalmap) texture value to shader
+			if(program_cnt == 1){
+				glActiveTexture(GL_TEXTURE0 + 9);
+				glBindTexture(GL_TEXTURE_2D, bumpTex);
+				glUniform1i(bumpTexID, 9);
+			}
+
 			if(program_cnt == 2){
+				// Pass the cubemap texture and eye position
 				glUseProgram(addPrograms[2]);
 				isEye = glGetUniformLocation(addPrograms[2], "WorldCameraPosition");
 				glUniform3f(isEye, eyePosition.x, eyePosition.y, eyePosition.z);
 				isSky = glGetUniformLocation(addPrograms[2], "DrawSkyBox");
 				glUniform1i(isSky, 1);
+				cubeTexID = glGetUniformLocation(addPrograms[2], "cubemap");
+				glActiveTexture(GL_TEXTURE0 + 10);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+				glUniform1i(cubeTexID, 10);
 				glDepthMask(GL_FALSE);
 				skybox.draw();
 				glDepthMask(GL_TRUE);
@@ -504,6 +578,8 @@ int main(void){
 
 	  // Clean up data structures and glsl objects
 	for(int i = 0; i < 9; i++) cubes[i].cleanup();
+	skybox.cleanup();
+	arcBall.cleanup();
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();

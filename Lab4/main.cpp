@@ -90,19 +90,22 @@ void init_cubeRBT(){
 	objectRBT[0] = glm::scale(1.2f, 1.2f, 1.2f) * glm::translate(-1.0f, 0.0f, .0f);
 	objectRBT[1] = glm::scale(1.2f, 1.2f, 1.2f) * glm::translate(1.0f, 0.0f, .0f);
 }
+
 void set_program(int p){
 	for(int i = 0; i < 2; i++){
 		cubes[i].GLSLProgramID = addPrograms[p];
 	}
 }
+
 void init_shader(int idx, const char * vertexShader_path, const char * fragmentShader_path){
 	addPrograms[idx] = LoadShaders(vertexShader_path, fragmentShader_path);
 	glUseProgram(addPrograms[idx]);
 }
+
 void init_cubemap(const char * baseFileName, int size){
 	glActiveTexture(GL_TEXTURE0 + 3);
-	glGenTextures(1, &cubeTexID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexID);
+	glGenTextures(1, &cubeTex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
 	const char * suffixes[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
 	GLuint targets[] = {
 		GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -125,6 +128,7 @@ void init_cubemap(const char * baseFileName, int size){
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 3);
 }
+
 void init_texture(void){
 	// TODO: Initialize first texture
 	texture[0] = loadBMP_custom("Judy.bmp");
@@ -145,6 +149,7 @@ void init_texture(void){
 	// TODO: Initialize Cubemap texture
 	init_cubemap("beach", 2048);
 }
+
 static bool non_ego_cube_manipulation(){
 	return object_index != 0 && view_index != object_index;
 }
@@ -258,8 +263,8 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos){
 			// Arcball: axis k and 2*theta (Chatper 8)
 			glm::quat w0 = w1 * w2;
 			// Halve the angle
-			glm::quat w = glm::angleAxis(glm::angle(w0) / 2.0f, glm::axis(w0));
-			m = glm::toMat4(w);
+			//glm::quat w = glm::angleAxis(glm::angle(w0) / 2.0f, glm::axis(w0));
+			m = glm::toMat4(w0);
 		}
 		else // ego motion
 		{
@@ -460,8 +465,8 @@ int main(void){
 				glUniform1i(isSky, 0);
 				// TODO: pass the cubemap texture to shader
 				glActiveTexture(GL_TEXTURE0 + 3);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexID);
-				glUniform1i(cubeTex, 3);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+				glUniform1i(cubeTexID, 3);
 			}
 			// TODO: pass the first texture value to shader
 			glActiveTexture(GL_TEXTURE0);
@@ -500,10 +505,10 @@ int main(void){
 				glUseProgram(addPrograms[2]);
 				isEye = glGetUniformLocation(addPrograms[2], "WorldCameraPosition");
 				glUniform3f(isEye, eyePosition.x, eyePosition.y, eyePosition.z);
-				cubeTex = glGetUniformLocation(addPrograms[2], "cubemap");
+				cubeTexID = glGetUniformLocation(addPrograms[2], "cubemap");
 				glActiveTexture(GL_TEXTURE0 + 3);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTexID);
-				glUniform1i(cubeTex, 3);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+				glUniform1i(cubeTexID, 3);
 
 				glDepthMask(GL_FALSE);
 				skybox.draw();
